@@ -1,0 +1,134 @@
+// Colors
+export const COLORS = {
+  // Bedroom
+  FLOOR_WOOD: 0xA07830,
+  WALL: 0xF2E0C8,
+  CEILING: 0xFFF0E0,
+  BED_FRAME: 0x5C3A1E,
+  BED_SHEET: 0xFFF0E0,
+  BLANKET: 0xC04040,
+  PILLOW: 0xFFF5EE,
+  DESK_WOOD: 0x6B4226,
+  BOOK_RACK: 0x5C3A1E,
+  MIRROR_FRAME: 0x8B7355,
+  MIRROR_GLASS: 0xB0C4DE,
+  KEYBOARD_BLACK: 0x222222,
+  KEYBOARD_WHITE: 0xF0F0F0,
+  KEYBOARD_STAND: 0x333333,
+  DOG_BODY: 0xD4A860,
+  DOG_DARK: 0xB8924A,
+  PAINTING_FRAME: 0x5C3A1E,
+  TROPHY_GOLD: 0xFFD700,
+  TROPHY_SILVER: 0xC0C0C0,
+  LAMP_BASE: 0x333333,
+  LAMP_SHADE: 0xFFF8DC,
+  FAIRY_LIGHT: 0xFFE4B5,
+  DOOR: 0x6B4226,
+  DOOR_FRAME: 0x4A2F1A,
+
+  // Character
+  SKIN: 0xDEB887,
+  HAIR: 0x1A1A1A,
+  VISOR: 0x1A1A1A,
+  JACKET_WHITE: 0xEEEEEE,
+  JACKET_RED: 0xCC2222,
+  JACKET_BLACK: 0x222222,
+  BUTTON_SILVER: 0xAAAAAA,
+  SLEEVE_RED: 0xCC2222,
+  SLEEVE_BLACK: 0x222222,
+  ELBOW_PATCH: 0x1A1A1A,
+  PANTS_RED: 0xCC2222,
+  PANTS_WHITE: 0xEEEEEE,
+  PANTS_BLACK: 0x1A1A1A,
+  BELT_RED: 0xBB2020,
+  BELT_BUCKLE: 0x999999,
+  KNEE_PAD: 0x1A1A1A,
+  BOOT: 0x222222,
+  GLOVE: 0x1A1A1A,
+  SPINE_STRIP: 0x1A1A1A,
+  BUCKLE_SILVER: 0xAAAAAA,
+
+  // Casual outfit
+  TSHIRT_WHITE: 0xF5F5F5,
+  PAJAMA_TEAL: 0x2A9D8F,
+  SLIPPER: 0x8B6F4E,
+
+  // Range
+  RANGE_FLOOR: 0x6A6A6A,
+  RANGE_WALL: 0xA0988E,
+  RANGE_CEILING: 0x959595,
+  LANE_DIVIDER: 0x556060,
+  BENCH: 0x6B4226,
+  TARGET_BOARD: 0xDDDDDD,
+  TARGET_YES: 0x44AA44,
+  TARGET_NO: 0xCC4444,
+  RIFLE_SILVER: 0xBBBBBB,
+  RIFLE_DARK: 0x333333,
+  RIFLE_CARBON: 0x2A2A2A,
+  RIFLE_RUBBER: 0x1A1A1A,
+  RIFLE_ALUMINUM: 0xCCCCCC,
+
+  // Celebration
+  HEART_RED: 0xFF2255,
+  HEART_PINK: 0xFF69B4,
+  CONFETTI_RED: 0xFF3344,
+  CONFETTI_PINK: 0xFF88AA,
+  CONFETTI_GOLD: 0xFFD700,
+  CONFETTI_WHITE: 0xFFFFFF,
+  FAIRY_WARM: 0xFFB366,
+};
+
+// Dimensions
+export const BEDROOM = {
+  WIDTH: 8,
+  DEPTH: 8,
+  HEIGHT: 3.5,
+  ORIGIN: { x: 0, y: 0, z: 0 },
+};
+
+export const RANGE = {
+  WIDTH: 8,
+  DEPTH: 30,
+  HEIGHT: 4,
+  ORIGIN: { x: 0, y: 0, z: -25 }, // Spatially separated
+};
+
+export const DOOR = {
+  WIDTH: 1.4,
+  HEIGHT: 2.6,
+  // Door is on -Z wall of bedroom
+  POSITION: { x: 0, y: 0, z: -BEDROOM.DEPTH / 2 },
+};
+
+// Player
+export const PLAYER = {
+  HEIGHT: 1.65,
+  SPEED: 3.5,
+  SPAWN: { x: 0, y: 0, z: 0 },
+};
+
+// Camera
+export const CAMERA = {
+  THIRD_PERSON_OFFSET: { x: 0, y: 2.5, z: 4 },
+  FOV: 65,
+  NEAR: 0.1,
+  FAR: 100,
+};
+
+// Targets
+export const TARGETS = {
+  DISTANCE: 20, // from shooting position
+  DODGE_THRESHOLD: 0.8,
+  DODGE_SPEED: 0.25,
+  DODGE_WAIT: 0.6,
+  DODGE_RETURN: 0.4,
+  YES_COUNT: 3,
+  NO_COUNT: 4,
+};
+
+// Telegram notification
+export const TELEGRAM_BOT_TOKEN = '8576846851:AAEC66VGXS3vm7L7PWjAVpdJIII4zh4I2NU'; // Fill with your bot token from @BotFather
+export const TELEGRAM_CHAT_ID = '2009978277';   // Prateek's chat ID
+
+// Celebration message
+export const CELEBRATION_MESSAGE = "Wow you hit Yes!! That means you've got a good plan coming your way from Prateek ;)";

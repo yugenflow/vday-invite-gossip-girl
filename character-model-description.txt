@@ -1,0 +1,80 @@
+Subject Overview: Olympic 10m Air Rifle Shooter
+Voxel/Roblox Aesthetic Note: The key characteristic of this outfit is stiffness. Shooting suits are made of thick, rigid canvas and leather to support the shooter's body. In a voxel style, this should translate to "blocky" silhouettes with very little fabric draping or folding. The character should look almost armored.
+
+1. The Outfit (Shooting Suit)
+Head & Accessories
+
+Visor: A black, open-top sun visor with a curved brim.
+
+Eyewear: (Optional) Shooting glasses with a blinder on the non-aiming eye.
+
+Gloves: A black, fingerless or padded shooting glove on the support hand (left hand for a right-handed shooter). The trigger hand is usually bare.
+
+Torso: The Shooting Jacket
+
+Material Appearance: Thick, heavy canvas and leather. It holds its shape rigidly.
+
+Front Design:
+
+Asymmetry: The design is asymmetrical.
+
+Colors: Primarily White and Red with Black accents.
+
+Fasteners: A vertical row of 4-5 large, silver/grey buttons runs down the front, slightly offset to the right side.
+
+Patches: A large, black, textured grip patch on the right shoulder (where the rifle butt rests) and black patches on the elbows.
+
+Back Design:
+
+Base: White leather/canvas.
+
+Color Block: A large angular Red panel covers the lower right back.
+
+Straps (Crucial Detail): A distinctive black vertical strip runs down the center of the spine containing multiple silver horizontal buckles or grommets (used for tightening the jacket).
+
+Text: Black letters "KYA" (or similar block text) on the lower left tail of the jacket.
+
+Legs: The Shooting Trousers
+
+Shape: Straight-legged, wide, and stiff. They do not crumple like jeans; they look like rigid tubes.
+
+Color Blocking:
+
+Top Block (Waist to Hips): White.
+
+Main Leg: Bright Red.
+
+Knees: Large, rectangular Black pads on both knees (vented or textured rubber appearance).
+
+Crotch: A black triangular flexible panel at the inner thigh.
+
+Belt: A thick Red belt with a flat rectangular buckle.
+
+Back of Pants: Zippers running down the back of the legs (often visible as black lines in voxel art).
+
+Feet
+
+Boots: Flat-soled shooting boots. Black leather, ankle-high, very flat bottom for stability. No heel drop.
+
+2. The Rifle (Precision Air Rifle)
+Model Identification: This appears to be a Walther LG400 (or similar high-end match air rifle).
+
+Stock: An aluminum chassis, highly skeletal and mechanical.
+
+Color: Silver/Metallic Grey aluminum body with Black carbon fiber accents.
+
+Barrel & Cylinder:
+
+Main Barrel: A long, sleek silver barrel, possibly with a carbon fiber sleeve (patterned black/grey).
+
+Air Cylinder: A thick, silver cylinder mounted directly underneath the barrel (this is the compressed air tank).
+
+Rear Assembly (Buttstock):
+
+Very complex and mechanical. It is not a solid piece of wood. It consists of adjustable metal rods, a cheek piece (black), and a buttplate (metal with rubber grip) that fits into the shoulder.
+
+Sights:
+
+Rear Sight: A complex "diopter" sight (a small black boxy unit) mounted near the shooter's eye.
+
+Front Sight: A tunnel sight (a small black ring/tube) at the very end of the barrel.
