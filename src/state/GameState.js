@@ -14,4 +14,6 @@ export const gameState = {
   makeupApplied: false,
   mailRead: false,
   inviteAccepted: false,
+  gameComplete: false,
+  surpriseShown: false,
 };

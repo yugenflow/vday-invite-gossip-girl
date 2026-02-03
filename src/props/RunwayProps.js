@@ -20,9 +20,11 @@ export function createRunwayPlatform() {
     metalness: 0.1,
     flatShading: true,
   });
+  // Raise platform slightly above floor to prevent z-fighting (top at Y=0.02)
+  const platformTopY = 0.02;
   const platformGeo = new THREE.BoxGeometry(platformW, platformH, platformD);
   const platform = new THREE.Mesh(platformGeo, platformMat);
-  platform.position.set(ox, platformH / 2, oz);
+  platform.position.set(ox, platformTopY - platformH / 2, oz);
   group.add(platform);
 
   // Edge lighting strips (gold, emissive)
@@ -32,10 +34,10 @@ export function createRunwayPlatform() {
     emissiveIntensity: 0.6,
   });
   const edgeL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, platformD), edgeMat);
-  edgeL.position.set(ox - platformW / 2, platformH / 2, oz);
+  edgeL.position.set(ox - platformW / 2, platformTopY, oz);
   group.add(edgeL);
   const edgeR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, platformD), edgeMat);
-  edgeR.position.set(ox + platformW / 2, platformH / 2, oz);
+  edgeR.position.set(ox + platformW / 2, platformTopY, oz);
   group.add(edgeR);
 
   // Runway floor lights (small bright dots along edges)
@@ -49,7 +51,7 @@ export function createRunwayPlatform() {
         emissiveIntensity: 0.8,
       });
       const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-      bulb.position.set(ox + side * (platformW / 2 + 0.06), 0.08, z);
+      bulb.position.set(ox + side * (platformW / 2 + 0.06), platformTopY + 0.02, z);
       group.add(bulb);
     }
   }
@@ -58,7 +60,7 @@ export function createRunwayPlatform() {
   for (let i = 0; i < 6; i++) {
     const z = oz - platformD / 2 + 2 + i * (platformD - 4) / 5;
     const edgeLight = new THREE.PointLight(0xFFFFFF, 0.15, 4);
-    edgeLight.position.set(ox, 0.15, z);
+    edgeLight.position.set(ox, platformTopY + 0.05, z);
     group.add(edgeLight);
   }
 

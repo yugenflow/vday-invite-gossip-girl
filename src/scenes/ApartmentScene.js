@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeBox } from '../utils/LowPolyHelpers.js';
+import { makeBox, makeSphere } from '../utils/LowPolyHelpers.js';
 import { COLORS, APARTMENT, DOOR } from '../constants.js';
 import { createBed } from '../props/Bed.js';
 import { createVanityMirror } from '../props/VanityMirror.js';
@@ -17,6 +17,7 @@ import { createTallPlant, createSmallPlant } from '../props/Plants.js';
 import { createWallGuitar } from '../props/Guitar.js';
 import { createLaptop } from '../props/Laptop.js';
 import { createMakeupKit } from '../props/MakeupKit.js';
+import { createPrateek, applyProposalPose } from '../character/PrateekModel.js';
 
 export function createApartmentScene() {
   const group = new THREE.Group();
@@ -334,4 +335,210 @@ function buildColliders(ox, oz, W, D) {
     { min: { x: ox - W / 2 - 0.2, z: oz + D / 2 }, max: { x: ox + W / 2 + 0.2, z: oz + D / 2 + 0.2 } },
     { min: { x: ox - W / 2 - 0.2, z: oz - D / 2 - 0.2 }, max: { x: ox + W / 2 + 0.2, z: oz - D / 2 } },
   ];
+}
+
+// Decorate the room for the Valentine's surprise ending
+export function decorateRoomForSurprise(apartmentGroup) {
+  const ox = APARTMENT.ORIGIN.x;
+  const oz = APARTMENT.ORIGIN.z;
+  const W = APARTMENT.WIDTH;
+  const D = APARTMENT.DEPTH;
+  const H = APARTMENT.HEIGHT;
+
+  const surpriseGroup = new THREE.Group();
+  surpriseGroup.name = 'surpriseDecoration';
+
+  // === PRATEEK STANDING - PROPOSAL POSE ===
+  const prateek = createPrateek();
+
+  // Position near center of room but toward the bed side
+  // Keep away from player spawn point (which is near the door)
+  // Door is at -Z side, so position him deeper in the room (+Z)
+  // Y offset of -0.34 to put feet on floor (model scaled 1.11x, feet at ~0.3 unscaled)
+  prateek.position.set(ox - 0.5, -0.34, oz + 1);
+
+  // Apply the standing proposal pose (arm extended with rose)
+  applyProposalPose(prateek);
+
+  // Rotate to face the door (door is at -Z)
+  // Model faces +Z by default, so rotate 180° to face -Z
+  prateek.rotation.y = Math.PI;
+
+  surpriseGroup.add(prateek);
+
+  // === ROSE PETALS ON BED ===
+  const petalColors = [0xCC1144, 0xDD2255, 0xBB0033, 0xFF4466];
+  for (let i = 0; i < 40; i++) {
+    const petalColor = petalColors[Math.floor(Math.random() * petalColors.length)];
+    const petal = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.01, 0.04),
+      new THREE.MeshLambertMaterial({ color: petalColor, flatShading: true })
+    );
+
+    // Scatter on bed area
+    petal.position.set(
+      ox - 1.5 + (Math.random() - 0.5) * 2.2,
+      0.52 + Math.random() * 0.05,
+      oz + D / 2 - 1.0 + (Math.random() - 0.5) * 1.4
+    );
+    petal.rotation.y = Math.random() * Math.PI * 2;
+    petal.rotation.x = Math.random() * 0.3;
+    surpriseGroup.add(petal);
+  }
+
+  // Some petals on the floor near the bed
+  for (let i = 0; i < 20; i++) {
+    const petalColor = petalColors[Math.floor(Math.random() * petalColors.length)];
+    const petal = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.01, 0.04),
+      new THREE.MeshLambertMaterial({ color: petalColor, flatShading: true })
+    );
+    petal.position.set(
+      ox - 1.5 + (Math.random() - 0.5) * 3,
+      0.01,
+      oz + D / 2 - 2.5 + Math.random() * 1.5
+    );
+    petal.rotation.y = Math.random() * Math.PI * 2;
+    surpriseGroup.add(petal);
+  }
+
+  // === FLOATING HEARTS ===
+  const heartPositions = [];
+  for (let i = 0; i < 15; i++) {
+    const heart = createFloatingHeart();
+    const x = ox + (Math.random() - 0.5) * W * 0.8;
+    const y = 1.0 + Math.random() * 1.5;
+    const z = oz + (Math.random() - 0.5) * D * 0.8;
+    heart.position.set(x, y, z);
+    heart.userData.floatOffset = Math.random() * Math.PI * 2;
+    heart.userData.floatSpeed = 0.5 + Math.random() * 0.5;
+    heart.userData.baseY = y;
+    surpriseGroup.add(heart);
+    heartPositions.push(heart);
+  }
+  surpriseGroup.userData.floatingHearts = heartPositions;
+
+  // === ROMANTIC LIGHTING ===
+  // Dim the normal lights and add pink/red romantic glow
+
+  // Pink ambient wash
+  const pinkAmbient = new THREE.AmbientLight(0xFF6688, 0.3);
+  surpriseGroup.add(pinkAmbient);
+
+  // Warm romantic point lights
+  const romanticLight1 = new THREE.PointLight(0xFF4466, 0.8, 8);
+  romanticLight1.position.set(ox - 1.5, 2, oz + 1);
+  surpriseGroup.add(romanticLight1);
+
+  const romanticLight2 = new THREE.PointLight(0xFF6699, 0.6, 6);
+  romanticLight2.position.set(ox + 1, 1.5, oz);
+  surpriseGroup.add(romanticLight2);
+
+  // Soft pink glow near bed
+  const bedGlow = new THREE.PointLight(0xFF5577, 0.7, 5);
+  bedGlow.position.set(ox - 1.5, 1, oz + D / 2 - 1);
+  surpriseGroup.add(bedGlow);
+
+  // Red accent light
+  const redAccent = new THREE.PointLight(0xCC2244, 0.4, 6);
+  redAccent.position.set(ox, 2.5, oz - 1);
+  surpriseGroup.add(redAccent);
+
+  // === EXTRA DECORATIONS ===
+  // Heart-shaped balloons near ceiling
+  for (let i = 0; i < 3; i++) {
+    const balloon = createHeartBalloon();
+    balloon.position.set(
+      ox - 2 + i * 1.5,
+      H - 0.5,
+      oz + D / 2 - 2
+    );
+    surpriseGroup.add(balloon);
+  }
+
+  apartmentGroup.add(surpriseGroup);
+  apartmentGroup.userData.surpriseDecoration = surpriseGroup;
+  apartmentGroup.userData.prateek = prateek;
+
+  return surpriseGroup;
+}
+
+// Create a simple 3D heart shape
+function createFloatingHeart() {
+  const group = new THREE.Group();
+  const heartColor = [0xFF4466, 0xFF6688, 0xCC2244, 0xFF5577][Math.floor(Math.random() * 4)];
+  const mat = new THREE.MeshLambertMaterial({
+    color: heartColor,
+    emissive: heartColor,
+    emissiveIntensity: 0.3,
+    transparent: true,
+    opacity: 0.85,
+    flatShading: true,
+  });
+
+  // Heart made from two spheres and a cone
+  const leftLobe = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), mat);
+  leftLobe.position.set(-0.05, 0.03, 0);
+  group.add(leftLobe);
+
+  const rightLobe = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), mat);
+  rightLobe.position.set(0.05, 0.03, 0);
+  group.add(rightLobe);
+
+  // Bottom point (cone/triangle)
+  const bottom = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.15, 4), mat);
+  bottom.position.set(0, -0.06, 0);
+  bottom.rotation.z = Math.PI;
+  group.add(bottom);
+
+  // Random rotation
+  group.rotation.y = Math.random() * Math.PI * 2;
+
+  return group;
+}
+
+// Create heart-shaped balloon with string
+function createHeartBalloon() {
+  const group = new THREE.Group();
+  const balloonColor = [0xFF4466, 0xFF1493, 0xCC2244][Math.floor(Math.random() * 3)];
+  const mat = new THREE.MeshLambertMaterial({
+    color: balloonColor,
+    emissive: balloonColor,
+    emissiveIntensity: 0.15,
+    flatShading: true,
+  });
+
+  // Larger heart shape
+  const leftLobe = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), mat);
+  leftLobe.position.set(-0.1, 0.05, 0);
+  group.add(leftLobe);
+
+  const rightLobe = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), mat);
+  rightLobe.position.set(0.1, 0.05, 0);
+  group.add(rightLobe);
+
+  const bottom = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.25, 4), mat);
+  bottom.position.set(0, -0.1, 0);
+  bottom.rotation.z = Math.PI;
+  group.add(bottom);
+
+  // String
+  const stringMat = new THREE.MeshBasicMaterial({ color: 0xCCCCCC });
+  const string = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.6, 4), stringMat);
+  string.position.set(0, -0.5, 0);
+  group.add(string);
+
+  return group;
+}
+
+// Animate floating hearts (call this in the game loop)
+export function animateFloatingHearts(surpriseGroup, time) {
+  if (!surpriseGroup || !surpriseGroup.userData.floatingHearts) return;
+
+  surpriseGroup.userData.floatingHearts.forEach(heart => {
+    // Gentle floating up and down
+    heart.position.y = heart.userData.baseY + Math.sin(time * heart.userData.floatSpeed + heart.userData.floatOffset) * 0.15;
+    // Slow rotation
+    heart.rotation.y += 0.005;
+  });
 }

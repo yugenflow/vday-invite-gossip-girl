@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CAMERA, PLAYER, APARTMENT, RUNWAY, DOOR, POSE_SPOTS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
 import { GameStateMachine, STATES } from './state/GameStateMachine.js';
 import { gameState } from './state/GameState.js';
-import { createApartmentScene } from './scenes/ApartmentScene.js';
+import { createApartmentScene, decorateRoomForSurprise, animateFloatingHearts } from './scenes/ApartmentScene.js';
 import { createRunwayScene } from './scenes/RunwayScene.js';
 import { createCharacter, animateCharacter, swapOutfit, poseCharacter, resetPose, applyMakeup } from './character/CharacterModel.js';
 import { CatAI } from './props/Cat.js';
@@ -559,6 +559,13 @@ fsm.on(STATES.RETURNING_APARTMENT, async () => {
   thirdPerson.azimuth = 0;
   character.rotation.y = 0;
 
+  // Decorate room with Prateek if game is complete and surprise not yet shown
+  if (gameState.gameComplete && !gameState.surpriseShown) {
+    decorateRoomForSurprise(apartmentScene);
+    gameState.surpriseShown = true;
+    hud.hideTask(); // Hide the "go back to room" task
+  }
+
   thirdPerson.setColliders([...(apartmentScene.userData.colliders || [])]);
   thirdPerson.setCameraBounds(apartmentBounds);
 
@@ -644,6 +651,8 @@ fsm.on(STATES.POST_CELEBRATION, () => {
   interaction.setInteractables([runwayDoorTrigger]);
 
   gameState.runwayDecorated = true;
+  // Mark game as complete immediately so surprise works even if player leaves early
+  gameState.gameComplete = true;
 
   setTimeout(() => {
     fsm.transition(STATES.SHARE);
@@ -652,6 +661,9 @@ fsm.on(STATES.POST_CELEBRATION, () => {
 
 fsm.on(STATES.SHARE, () => {
   shareOverlay.show();
+
+  // Show task to go back to room immediately
+  hud.showTask("Go back to your room for a surprise!");
 });
 
 // --- Loading / Start / Key Gate ---
@@ -778,6 +790,11 @@ function animate() {
   if (apartmentScene.visible && catAI) {
     catAI.setPlayerPos(gameState.playerPosition);
     catAI.update(dt, time);
+  }
+
+  // Animate floating hearts in surprise room
+  if (apartmentScene.visible && apartmentScene.userData.surpriseDecoration) {
+    animateFloatingHearts(apartmentScene.userData.surpriseDecoration, time);
   }
 
   // Pose and spot dodge systems

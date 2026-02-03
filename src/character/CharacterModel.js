@@ -475,6 +475,13 @@ export function createCharacter() {
   group.userData.leftArm = casualOutfit.userData.leftArm;
   group.userData.rightArm = casualOutfit.userData.rightArm;
 
+  // Offset visual model down so feet touch the ground
+  // (Model origin is at hip level, feet are ~0.49 above that)
+  const GROUND_OFFSET = -0.49;
+  group.children.forEach(child => {
+    child.position.y += GROUND_OFFSET;
+  });
+
   return group;
 }
 
@@ -562,12 +569,15 @@ export function animateCharacter(group, time, isMoving) {
 }
 
 export function applyMakeup(group) {
-  // Find the head group (first child that contains eyes)
-  let headGroup = null;
-  for (const child of group.children) {
-    if (child.isGroup && child.position.y > 1.5) {
-      headGroup = child;
-      break;
+  // Find the head group from userData (more reliable than position check)
+  let headGroup = group.userData.headGroup;
+  if (!headGroup) {
+    // Fallback: find by position (accounting for ground offset)
+    for (const child of group.children) {
+      if (child.isGroup && child.position.y > 1.0) {
+        headGroup = child;
+        break;
+      }
     }
   }
   if (!headGroup) return;

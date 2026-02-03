@@ -101,9 +101,9 @@ export function createRunwayScene() {
   backWall.position.set(ox, H / 2, oz - D / 2 - 0.075);
   group.add(backWall);
 
-  // Front wall with door gap
-  const doorW = 1.4;
-  const doorH = 2.6;
+  // Front wall with door gap (matching apartment door proportions)
+  const doorW = 0.9;
+  const doorH = 1.8;
   const fwZ = oz + D / 2 + 0.075;
 
   const fwLeft = new THREE.Mesh(new THREE.BoxGeometry((W - doorW) / 2, H, 0.15), wallMat);

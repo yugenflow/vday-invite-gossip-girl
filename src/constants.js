@@ -103,8 +103,8 @@ export const RUNWAY = {
 };
 
 export const DOOR = {
-  WIDTH: 1.4,
-  HEIGHT: 2.6,
+  WIDTH: 0.9,
+  HEIGHT: 1.8,
   POSITION: { x: 0, y: 0, z: -APARTMENT.DEPTH / 2 },
 };
 
@@ -129,7 +129,7 @@ export const POSE_SPOTS = {
   NO_COUNT: 5,
   POSE_DURATION: 2.0,
   PROXIMITY: 1.5,
-  DODGE_THRESHOLD: 2.5,
+  DODGE_THRESHOLD: 0.7,  // Must be standing inside the spot to trigger
   DODGE_SPEED: 0.3,
   DODGE_WAIT: 0.5,
   DODGE_RETURN: 0.4,
