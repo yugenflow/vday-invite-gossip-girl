@@ -11,4 +11,7 @@ export const gameState = {
   celebrated: false,
   runwayDecorated: false,
   outfitChanged: false,
+  makeupApplied: false,
+  mailRead: false,
+  inviteAccepted: false,
 };

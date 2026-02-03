@@ -15,6 +15,8 @@ import { createWardrobe } from '../props/Wardrobe.js';
 import { createFullLengthMirror } from '../props/FullLengthMirror.js';
 import { createTallPlant, createSmallPlant } from '../props/Plants.js';
 import { createWallGuitar } from '../props/Guitar.js';
+import { createLaptop } from '../props/Laptop.js';
+import { createMakeupKit } from '../props/MakeupKit.js';
 
 export function createApartmentScene() {
   const group = new THREE.Group();
@@ -176,6 +178,20 @@ export function createApartmentScene() {
   const headbands = createHeadbands();
   headbands.position.set(ox - W / 2 + 0.7, 0.75, oz + 0.2);
   group.add(headbands);
+
+  // === Laptop on vanity desk (work laptop with BCG logo) ===
+  const laptop = createLaptop();
+  laptop.position.set(ox - W / 2 + 0.55, 0.77, oz - 0.65);
+  laptop.rotation.y = -Math.PI / 2 + 0.15; // Screen facing toward the chair/player
+  group.add(laptop);
+  group.userData.laptop = laptop;
+
+  // === Makeup Kit (beside vanity, on the desk surface) ===
+  const makeupKit = createMakeupKit();
+  makeupKit.position.set(ox - W / 2 + 0.55, 0.77, oz - 0.2);
+  makeupKit.rotation.y = Math.PI / 2;
+  group.add(makeupKit);
+  group.userData.makeupKit = makeupKit;
 
   // === Bag Cabinet (against right wall) ===
   const bagCabinet = createBagCabinet();

@@ -63,17 +63,21 @@ function createSpotMarker(x, z, type, index) {
   const group = new THREE.Group();
 
   const isYes = type === 'yes';
-  const fillColor = isYes ? 0x90EE90 : 0xFFB6C1;  // light green / light pink
-  const outlineColor = isYes ? 0x006400 : 0xCC0000; // dark green / red
-  const glowColor = isYes ? 0x44FF66 : 0xFF4444;
+  // YES: light translucent green fill, dark green outline, dark green text
+  // NO: light pink fill, red outline, dark red text
+  const fillColor = isYes ? 0xA8E6A8 : 0xFFCCCC;  // light green / light pink
+  const outlineColor = isYes ? 0x228B22 : 0xCC0000; // forest green / red
+  const textColorHex = isYes ? '#1B5E20' : '#8B0000'; // dark green / dark red
   const label = isYes ? 'YES' : 'NO';
 
-  // Filled circular floor marker
+  // Filled circular floor marker (slightly translucent)
   const circleGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.03, 24);
   const circleMat = new THREE.MeshLambertMaterial({
     color: fillColor,
     emissive: fillColor,
-    emissiveIntensity: 0.3,
+    emissiveIntensity: 0.2,
+    transparent: true,
+    opacity: 0.85,
     flatShading: true,
   });
   const circle = new THREE.Mesh(circleGeo, circleMat);
@@ -94,9 +98,8 @@ function createSpotMarker(x, z, type, index) {
   group.add(ring);
   group.userData.ring = ring;
 
-  // Bold text label (black on the colored fill)
-  const textColor = '#000000';
-  const canvas = makeTextCanvas(label, 256, 128, 'bold 90px Georgia', textColor, 'transparent');
+  // Bold text label (dark green for YES, dark red for NO)
+  const canvas = makeTextCanvas(label, 256, 128, 'bold 90px Georgia', textColorHex, 'transparent');
   const tex = new THREE.CanvasTexture(canvas);
   const textMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
   const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.35), textMat);

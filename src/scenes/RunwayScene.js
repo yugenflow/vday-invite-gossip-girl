@@ -7,6 +7,55 @@ import { createGossipGirlCard } from '../props/GossipGirlCard.js';
 import { createPhotographer } from '../props/RunwayAudience.js';
 import { createFairyLights } from '../props/FairyLights.js';
 
+// Create a checkerboard VOGUE banner using a single canvas texture (optimized)
+function createVogueBanner(width, height) {
+  // Create entire banner as a single canvas texture for better performance
+  const cols = 4;
+  const rows = 6;
+  const canvasWidth = 512;
+  const canvasHeight = 768;
+  const squareW = canvasWidth / cols;
+  const squareH = canvasHeight / rows;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+  const ctx = canvas.getContext('2d');
+
+  // Draw checkerboard pattern with VOGUE text on every square
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const isWhite = (row + col) % 2 === 0;
+      const bgColor = isWhite ? '#FFFFFF' : '#000000';
+      const textColor = isWhite ? '#000000' : '#FFFFFF';
+
+      // Draw square background
+      const x = col * squareW;
+      const y = (rows - 1 - row) * squareH; // Flip Y for canvas coordinates
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(x, y, squareW, squareH);
+
+      // Draw VOGUE text centered in square
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 28px Georgia';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('VOGUE', x + squareW / 2, y + squareH / 2);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.DoubleSide,
+  });
+
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), material);
+  return mesh;
+}
+
 export function createRunwayScene() {
   const group = new THREE.Group();
   const ox = RUNWAY.ORIGIN.x;
@@ -80,6 +129,30 @@ export function createRunwayScene() {
   const frameTop = new THREE.Mesh(new THREE.BoxGeometry(doorW + 0.16, 0.08, 0.2), frameMat);
   frameTop.position.set(ox, doorH, fwZ);
   group.add(frameTop);
+
+  // --- VOGUE Checkerboard Banners (on either side of entrance) ---
+  const bannerWidth = 2.5;
+  const bannerHeight = 3.5;
+
+  // Left banner (positioned to left of door, facing into runway)
+  const leftBanner = createVogueBanner(bannerWidth, bannerHeight);
+  leftBanner.position.set(ox - doorW / 2 - bannerWidth / 2 - 0.3, bannerHeight / 2 + 0.3, fwZ - 0.1);
+  leftBanner.rotation.y = Math.PI; // Face into the runway
+  group.add(leftBanner);
+
+  // Right banner (positioned to right of door, facing into runway)
+  const rightBanner = createVogueBanner(bannerWidth, bannerHeight);
+  rightBanner.position.set(ox + doorW / 2 + bannerWidth / 2 + 0.3, bannerHeight / 2 + 0.3, fwZ - 0.1);
+  rightBanner.rotation.y = Math.PI; // Face into the runway
+  group.add(rightBanner);
+
+  // Add lights to illuminate the banners
+  const bannerLightL = new THREE.PointLight(0xFFFFFF, 0.8, 6);
+  bannerLightL.position.set(ox - doorW / 2 - bannerWidth / 2 - 0.3, bannerHeight + 0.5, fwZ - 1);
+  group.add(bannerLightL);
+  const bannerLightR = new THREE.PointLight(0xFFFFFF, 0.8, 6);
+  bannerLightR.position.set(ox + doorW / 2 + bannerWidth / 2 + 0.3, bannerHeight + 0.5, fwZ - 1);
+  group.add(bannerLightR);
 
   // --- Runway Platform (white/light surface) ---
   const platform = createRunwayPlatform();

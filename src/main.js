@@ -4,7 +4,7 @@ import { GameStateMachine, STATES } from './state/GameStateMachine.js';
 import { gameState } from './state/GameState.js';
 import { createApartmentScene } from './scenes/ApartmentScene.js';
 import { createRunwayScene } from './scenes/RunwayScene.js';
-import { createCharacter, animateCharacter, swapOutfit, poseCharacter, resetPose } from './character/CharacterModel.js';
+import { createCharacter, animateCharacter, swapOutfit, poseCharacter, resetPose, applyMakeup } from './character/CharacterModel.js';
 import { CatAI } from './props/Cat.js';
 import { ThirdPersonController } from './controls/ThirdPersonController.js';
 import { CelebrationSystem } from './systems/CelebrationSystem.js';
@@ -16,6 +16,7 @@ import { HUD } from './ui/HUD.js';
 import { GuidelinesOverlay } from './ui/GuidelinesOverlay.js';
 import { CelebrationOverlay } from './ui/CelebrationOverlay.js';
 import { ShareOverlay } from './ui/ShareOverlay.js';
+import { EmailOverlay } from './ui/EmailOverlay.js';
 import { isMobile, VirtualJoystick, TouchCameraController } from './controls/MobileControls.js';
 
 // --- Mobile setup ---
@@ -64,6 +65,12 @@ if (wardrobe) {
   wardrobe.userData.tertiaryType = 'wardrobe';
   wardrobe.userData.tertiaryPromptText = 'Press C to change into runway outfit';
 }
+
+// --- Laptop interactable (primary, E key) ---
+const laptop = apartmentScene.userData.laptop;
+
+// --- Makeup kit interactable (secondary, R key) ---
+const makeupKit = apartmentScene.userData.makeupKit;
 
 // --- Cat AI ---
 let catGroup = apartmentScene.userData.cat || null;
@@ -131,6 +138,7 @@ const hud = new HUD();
 const guidelinesOverlay = new GuidelinesOverlay();
 const celebrationOverlay = new CelebrationOverlay();
 const shareOverlay = new ShareOverlay();
+const emailOverlay = new EmailOverlay();
 
 // --- Telegram helper ---
 function sendTelegram(text) {
@@ -279,6 +287,8 @@ if (!isMobile) {
 }
 
 // --- State transitions ---
+let apartmentFirstEntry = true;
+
 fsm.on(STATES.APARTMENT, () => {
   apartmentScene.visible = true;
   runwayScene.visible = false;
@@ -289,20 +299,15 @@ fsm.on(STATES.APARTMENT, () => {
   interaction.enable();
   updateResetCameraBtn();
 
-  // Update door prompt based on outfit state
-  if (gameState.outfitChanged) {
-    doorTrigger.userData.promptText = 'Press E to head to the runway';
-  } else {
-    doorTrigger.userData.promptText = 'Please change into runway outfit from wardrobe first!';
+  // First time entering apartment - send Telegram and show first task
+  if (apartmentFirstEntry) {
+    apartmentFirstEntry = false;
+    sendTelegram("👗 [UES] Cutakshita has entered her room");
+    hud.showTask("Check your work laptop for new mail");
   }
-  interaction.setInteractables([doorTrigger]);
 
-  // Only show wardrobe interaction if outfit not yet changed
-  if (!gameState.outfitChanged && wardrobe) {
-    interaction.setTertiaryInteractables([wardrobe]);
-  } else {
-    interaction.setTertiaryInteractables([]);
-  }
+  // Setup interactables based on current game state
+  updateApartmentInteractables();
 
   // Cat petting interaction (once cat is added)
   if (catGroup) {
@@ -310,9 +315,65 @@ fsm.on(STATES.APARTMENT, () => {
   }
 });
 
+function updateApartmentInteractables() {
+  const primaryInteractables = [];
+  const secondaryInteractables = [];
+  const tertiaryInteractables = [];
+
+  // Laptop: only interactable if mail not yet read
+  if (!gameState.mailRead && laptop) {
+    primaryInteractables.push(laptop);
+  }
+
+  // Door: only interactable if fully ready (invite accepted, outfit changed, makeup applied)
+  if (gameState.inviteAccepted && gameState.outfitChanged && gameState.makeupApplied) {
+    doorTrigger.userData.promptText = 'Press E to head to the runway';
+    primaryInteractables.push(doorTrigger);
+  } else if (gameState.inviteAccepted) {
+    // Show door but with a blocking message
+    if (!gameState.outfitChanged) {
+      doorTrigger.userData.promptText = 'Change into runway outfit first!';
+    } else if (!gameState.makeupApplied) {
+      doorTrigger.userData.promptText = 'Apply makeup before heading out!';
+    }
+    primaryInteractables.push(doorTrigger);
+  }
+
+  // Makeup kit: only interactable after outfit changed but before makeup applied
+  if (gameState.inviteAccepted && gameState.outfitChanged && !gameState.makeupApplied && makeupKit) {
+    secondaryInteractables.push(makeupKit);
+  }
+
+  // Wardrobe: only interactable after invite accepted but before outfit changed
+  if (gameState.inviteAccepted && !gameState.outfitChanged && wardrobe) {
+    tertiaryInteractables.push(wardrobe);
+  }
+
+  interaction.setInteractables(primaryInteractables);
+  interaction.setSecondaryInteractables(secondaryInteractables);
+  interaction.setTertiaryInteractables(tertiaryInteractables);
+}
+
 interaction.onInteract = (type) => {
+  // Laptop interaction - show email overlay
+  if (type === 'laptop' && fsm.is(STATES.APARTMENT) && !gameState.mailRead) {
+    sendTelegram("📧 [UES] She is checking her mail...");
+    emailOverlay.show();
+    thirdPerson.disable();
+    if (!isMobile && document.pointerLockElement) {
+      document.exitPointerLock();
+    }
+    return;
+  }
+
+  // Door to runway
   if (type === 'door_to_runway' && fsm.is(STATES.APARTMENT)) {
-    if (!gameState.outfitChanged) return;
+    if (!gameState.inviteAccepted || !gameState.outfitChanged || !gameState.makeupApplied) {
+      // Show blocking message - already set in updateApartmentInteractables
+      return;
+    }
+    sendTelegram("🚪 [UES] Entered the runway!!");
+    hud.hideTask();
     fsm.transition(STATES.ENTERING_RUNWAY);
   }
   if (type === 'door_to_apartment' && (fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE))) {
@@ -327,16 +388,27 @@ interaction.onSecondaryInteract = (type) => {
   if (type === 'gossip_girl_card') {
     guidelinesOverlay.show();
   }
+  // Makeup interaction
+  if (type === 'makeup' && fsm.is(STATES.APARTMENT) && gameState.outfitChanged && !gameState.makeupApplied) {
+    gameState.makeupApplied = true;
+    applyMakeup(character); // Apply visual makeup to character model
+    sendTelegram("💄 [UES] Makeup applied - she's runway ready!");
+    hud.showTask("Head to the runway!");
+    interaction.showPrompt('Runway makeup applied!');
+    setTimeout(() => interaction.hidePrompt(), 2000);
+    updateApartmentInteractables();
+  }
 };
 
 interaction.onTertiaryInteract = (type) => {
-  if (type === 'wardrobe' && fsm.is(STATES.APARTMENT) && !gameState.outfitChanged) {
+  if (type === 'wardrobe' && fsm.is(STATES.APARTMENT) && gameState.inviteAccepted && !gameState.outfitChanged) {
     swapOutfit(character, 'runway');
     gameState.outfitChanged = true;
-    interaction.setTertiaryInteractables([]);
-    doorTrigger.userData.promptText = 'Press E to head to the runway';
+    sendTelegram("👗 [UES] Getting runway ready - outfit changed!");
+    hud.showTask("Apply makeup for the runway");
     interaction.showPrompt('Changed into runway outfit!');
     setTimeout(() => interaction.hidePrompt(), 2000);
+    updateApartmentInteractables();
   }
 };
 
@@ -351,6 +423,40 @@ interaction.onPetInteract = (catObj) => {
   petAnimTimer = 2.5;
   interaction.showPrompt('Petting Nugget...');
 };
+
+// --- Email overlay callbacks ---
+emailOverlay.onAccept = () => {
+  gameState.mailRead = true;
+  gameState.inviteAccepted = true;
+  sendTelegram("✅ [UES] Runway invite ACCEPTED!");
+  hud.showTask("Change into your runway outfit");
+  thirdPerson.enable();
+  updateApartmentInteractables();
+};
+
+emailOverlay.onDecline = () => {
+  gameState.mailRead = true;
+  gameState.inviteAccepted = false;
+  showRejectionPopup();
+};
+
+function showRejectionPopup() {
+  const rejectionOverlay = document.getElementById('rejection-overlay');
+  const countdownEl = document.getElementById('countdown');
+  if (rejectionOverlay) {
+    rejectionOverlay.classList.add('visible');
+    let countdown = 5;
+    countdownEl.textContent = countdown;
+    const interval = setInterval(() => {
+      countdown--;
+      countdownEl.textContent = countdown;
+      if (countdown <= 0) {
+        clearInterval(interval);
+        location.reload();
+      }
+    }, 1000);
+  }
+}
 
 let ggBlastFirstView = true;
 
@@ -419,6 +525,7 @@ fsm.on(STATES.RUNWAY_WALK, () => {
   spotDodgeSystem.enable();
 
   hud.showHitCounter(poseCount, POSES_REQUIRED);
+  hud.showTask(`Strike a pose on the YES spots! (${poseCount}/${POSES_REQUIRED})`);
 
   if (isMobile) {
     const poseBtnEl = document.getElementById('mobile-pose-btn');
@@ -464,19 +571,24 @@ fsm.on(STATES.RETURNING_APARTMENT, async () => {
 function onPoseStruck() {
   poseCount++;
   hud.showHitCounter(poseCount, POSES_REQUIRED);
+  hud.showTask(`Strike a pose on the YES spots! (${poseCount}/${POSES_REQUIRED})`);
 
   // Pose animation — hold until player presses E again
   poseCharacter(character, poseCount - 1);
   thirdPerson.disable(); // freeze movement while posing
 
   if (poseCount >= POSES_REQUIRED) {
+    // Final pose - send special telegram
+    sendTelegram("🎉 [UES] 3/3 YES! Valentine invite accepted! ❤️");
+    hud.hideTask();
     // Auto-release pose after a brief moment then celebrate
     setTimeout(() => {
       resetPose(character);
       fsm.transition(STATES.CELEBRATION);
     }, 1500);
   } else {
-    sendTelegram(`\uD83D\uDCF8 [UES] Akshita struck a pose! (${poseCount}/${POSES_REQUIRED}) \uD83D\uDC83`);
+    // Individual pose telegrams
+    sendTelegram(`📸 [UES] ${poseCount}/${POSES_REQUIRED} Poses struck! 💃`);
   }
 }
 
