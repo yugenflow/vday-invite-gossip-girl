@@ -1,4 +1,4 @@
-import { CELEBRATION_MESSAGE } from '../constants.js';
+import { MESSAGES } from '../constants.js';
 
 export class CelebrationOverlay {
   constructor() {
@@ -7,7 +7,11 @@ export class CelebrationOverlay {
     this.continueBtn = document.getElementById('celebration-continue');
     this.onContinue = null;
 
-    this.textEl.textContent = CELEBRATION_MESSAGE;
+    // Set combined message with GG narration
+    this.textEl.innerHTML = `
+      <span style="display:block;margin-bottom:16px;">${MESSAGES.CELEBRATION}</span>
+      <span style="display:block;font-style:italic;font-size:0.9rem;color:#999;line-height:1.6;">${MESSAGES.GG_NARRATION}</span>
+    `;
 
     this.continueBtn.addEventListener('click', () => {
       this.hide();

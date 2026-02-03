@@ -1,19 +1,17 @@
 import * as THREE from 'three';
-import { CAMERA, PLAYER, BEDROOM, RANGE, DOOR, TARGETS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
+import { CAMERA, PLAYER, APARTMENT, RUNWAY, DOOR, POSE_SPOTS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
 import { GameStateMachine, STATES } from './state/GameStateMachine.js';
 import { gameState } from './state/GameState.js';
-import { createBedroomScene } from './scenes/BedroomScene.js';
-import { createRangeScene } from './scenes/RangeScene.js';
-import { createCharacter, animateCharacter, swapOutfit } from './character/CharacterModel.js';
-import { DogAI } from './props/Labrador.js';
-import { createFPSRifle } from './props/Rifle.js';
+import { createApartmentScene } from './scenes/ApartmentScene.js';
+import { createRunwayScene } from './scenes/RunwayScene.js';
+import { createCharacter, animateCharacter, swapOutfit, poseCharacter, resetPose } from './character/CharacterModel.js';
+import { CatAI } from './props/Cat.js';
 import { ThirdPersonController } from './controls/ThirdPersonController.js';
-import { FirstPersonController } from './controls/FirstPersonController.js';
-import { ShootingSystem } from './systems/ShootingSystem.js';
-import { TargetDodgeSystem } from './systems/TargetDodgeSystem.js';
 import { CelebrationSystem } from './systems/CelebrationSystem.js';
 import { InteractionSystem } from './systems/InteractionSystem.js';
 import { TransitionSystem } from './systems/TransitionSystem.js';
+import { PoseSystem } from './systems/PoseSystem.js';
+import { SpotDodgeSystem } from './systems/SpotDodgeSystem.js';
 import { HUD } from './ui/HUD.js';
 import { GuidelinesOverlay } from './ui/GuidelinesOverlay.js';
 import { CelebrationOverlay } from './ui/CelebrationOverlay.js';
@@ -47,12 +45,12 @@ scene.background = new THREE.Color(0x111111);
 scene.fog = new THREE.Fog(0x111111, 40, 80);
 
 // --- Build scenes ---
-const bedroomScene = createBedroomScene();
-scene.add(bedroomScene);
+const apartmentScene = createApartmentScene();
+scene.add(apartmentScene);
 
-const rangeScene = createRangeScene();
-scene.add(rangeScene);
-rangeScene.visible = false; // Start hidden
+const runwayScene = createRunwayScene();
+scene.add(runwayScene);
+runwayScene.visible = false;
 
 // --- Character ---
 const character = createCharacter();
@@ -60,48 +58,45 @@ character.position.set(PLAYER.SPAWN.x, 0, PLAYER.SPAWN.z);
 scene.add(character);
 
 // --- Wardrobe interactable (tertiary, C key) ---
-const wardrobe = bedroomScene.userData.wardrobe;
+const wardrobe = apartmentScene.userData.wardrobe;
 if (wardrobe) {
   wardrobe.userData.tertiaryInteractable = true;
   wardrobe.userData.tertiaryType = 'wardrobe';
-  wardrobe.userData.tertiaryPromptText = 'Press C to change into shooting outfit';
+  wardrobe.userData.tertiaryPromptText = 'Press C to change into runway outfit';
 }
 
-// --- Dog AI ---
-const dogGroup = bedroomScene.userData.labrador;
-const dogAI = dogGroup ? new DogAI(dogGroup, bedroomScene.userData.colliders || [], {
-  minX: BEDROOM.ORIGIN.x - BEDROOM.WIDTH / 2,
-  maxX: BEDROOM.ORIGIN.x + BEDROOM.WIDTH / 2,
-  minZ: BEDROOM.ORIGIN.z - BEDROOM.DEPTH / 2,
-  maxZ: BEDROOM.ORIGIN.z + BEDROOM.DEPTH / 2,
+// --- Cat AI ---
+let catGroup = apartmentScene.userData.cat || null;
+let catAI = catGroup ? new CatAI(catGroup, apartmentScene.userData.colliders || [], {
+  minX: APARTMENT.ORIGIN.x - APARTMENT.WIDTH / 2,
+  maxX: APARTMENT.ORIGIN.x + APARTMENT.WIDTH / 2,
+  minZ: APARTMENT.ORIGIN.z - APARTMENT.DEPTH / 2,
+  maxZ: APARTMENT.ORIGIN.z + APARTMENT.DEPTH / 2,
 }) : null;
 
-// --- Door interactable (invisible trigger in bedroom) ---
+// --- Door interactable (invisible trigger in apartment) ---
 const doorTrigger = new THREE.Group();
-const doorZ = BEDROOM.ORIGIN.z - BEDROOM.DEPTH / 2;
+const doorZ = APARTMENT.ORIGIN.z - APARTMENT.DEPTH / 2;
 doorTrigger.position.set(DOOR.POSITION.x, 1, doorZ);
 doorTrigger.userData.interactable = true;
-doorTrigger.userData.interactionType = 'door_to_range';
-doorTrigger.userData.promptText = 'Please change into shooting outfit from wardrobe to go to range!';
+doorTrigger.userData.interactionType = 'door_to_runway';
+doorTrigger.userData.promptText = 'Please change into runway outfit from wardrobe first!';
 scene.add(doorTrigger);
 
-// --- Door interactable in range (back to bedroom) ---
-const rangeDoorTrigger = new THREE.Group();
-const rangeDoorZ = RANGE.ORIGIN.z + RANGE.DEPTH / 2;
-rangeDoorTrigger.position.set(RANGE.ORIGIN.x, 1, rangeDoorZ);
-rangeDoorTrigger.userData.interactable = true;
-rangeDoorTrigger.userData.interactionType = 'door_to_bedroom';
-rangeDoorTrigger.userData.promptText = 'Press E to go back to room';
-scene.add(rangeDoorTrigger);
+// --- Door interactable in runway (back to apartment) ---
+const runwayDoorTrigger = new THREE.Group();
+const runwayDoorZ = RUNWAY.ORIGIN.z + RUNWAY.DEPTH / 2;
+runwayDoorTrigger.position.set(RUNWAY.ORIGIN.x, 1, runwayDoorZ);
+runwayDoorTrigger.userData.interactable = true;
+runwayDoorTrigger.userData.interactionType = 'door_to_apartment';
+runwayDoorTrigger.userData.promptText = 'Press E to go back to apartment';
+scene.add(runwayDoorTrigger);
 
 // --- State Machine ---
 const fsm = new GameStateMachine();
 
 // --- Systems ---
 const thirdPerson = new ThirdPersonController(camera, character, document, isMobile);
-const firstPerson = new FirstPersonController(camera, document, isMobile);
-const shootingSystem = new ShootingSystem(camera, scene);
-const targetDodge = new TargetDodgeSystem(scene);
 const celebration = new CelebrationSystem(scene);
 const interaction = new InteractionSystem(isMobile);
 const transition = new TransitionSystem(camera);
@@ -113,37 +108,23 @@ if (isMobile) {
   joystick = new VirtualJoystick(document.getElementById('mobile-joystick-zone'));
   touchCam = new TouchCameraController(document.getElementById('mobile-camera-zone'));
 
-  // Shoot button
-  document.getElementById('mobile-shoot-btn').addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if (fsm.is(STATES.SHOOTING) && shootingSystem.enabled) {
-      const result = shootingSystem.shoot();
-      if (result === 'yes') {
-        yesHitCount++;
-        hud.showHitCounter(yesHitCount, YES_HITS_REQUIRED);
-        if (yesHitCount >= YES_HITS_REQUIRED) {
-          fsm.transition(STATES.CELEBRATION);
+  // Mobile pose button
+  const poseBtnEl = document.getElementById('mobile-pose-btn');
+  if (poseBtnEl) {
+    poseBtnEl.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (fsm.is(STATES.RUNWAY_WALK) && poseSystem) {
+        if (poseSystem.isPosing()) {
+          poseSystem.tryPose();
+          resetPose(character);
+          thirdPerson.enable();
         } else {
-          sendTelegram(`She hit YES! (${yesHitCount}/${YES_HITS_REQUIRED} targets) \uD83C\uDFAF`);
+          poseSystem.tryPose();
         }
-      } else if (result && result.type === 'no') {
-        targetDodge.onShootAtNo(result.target);
       }
-    }
-  });
-
-  // ADS toggle
-  document.getElementById('mobile-aim-btn').addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    firstPerson.toggleAim();
-    e.target.classList.toggle('active', firstPerson.aiming);
-  });
+    });
+  }
 }
-
-// Set targets
-const targets = rangeScene.userData.targets || [];
-shootingSystem.setTargets(targets);
-targetDodge.setTargets(targets);
 
 // --- UI ---
 const hud = new HUD();
@@ -163,26 +144,62 @@ function sendTelegram(text) {
   } catch (e) { /* silent */ }
 }
 
-// --- YES hit counter ---
-let yesHitCount = 0;
-const YES_HITS_REQUIRED = 3;
+// --- Pose counter ---
+let poseCount = 0;
+const POSES_REQUIRED = 3;
+
+// --- Photographer flash system ---
+const photographers = runwayScene.userData.photographers || [];
+let flashTimers = photographers.map(() => Math.random() * 3 + 1);
+
+function updatePhotographerFlashes(dt) {
+  photographers.forEach((photog, i) => {
+    flashTimers[i] -= dt;
+    const bulb = photog.userData.flashBulb;
+    const light = photog.userData.flashLight;
+    if (!bulb || !light) return;
+
+    if (flashTimers[i] <= 0) {
+      // Fire flash
+      bulb.material.emissiveIntensity = 3.0;
+      light.intensity = 4.0;
+      // Reset timer (random 1.5-5 seconds)
+      flashTimers[i] = Math.random() * 3.5 + 1.5;
+    } else {
+      // Decay flash
+      bulb.material.emissiveIntensity *= 0.85;
+      light.intensity *= 0.85;
+      if (bulb.material.emissiveIntensity < 0.01) bulb.material.emissiveIntensity = 0;
+      if (light.intensity < 0.01) light.intensity = 0;
+    }
+  });
+}
+
+// --- Pose System & Spot Dodge System ---
+const poseSystem = new PoseSystem(scene, character);
+const poseSpots = runwayScene.userData.poseSpots || [];
+poseSystem.setPoseSpots(poseSpots);
+poseSystem.onPoseStruck = () => onPoseStruck();
+
+const spotDodgeSystem = new SpotDodgeSystem(scene);
+spotDodgeSystem.setSpots(poseSpots);
 
 // --- Camera bounds helpers ---
-const bedroomBounds = {
-  minX: BEDROOM.ORIGIN.x - BEDROOM.WIDTH / 2,
-  maxX: BEDROOM.ORIGIN.x + BEDROOM.WIDTH / 2,
+const apartmentBounds = {
+  minX: APARTMENT.ORIGIN.x - APARTMENT.WIDTH / 2,
+  maxX: APARTMENT.ORIGIN.x + APARTMENT.WIDTH / 2,
   minY: 0,
-  maxY: BEDROOM.HEIGHT,
-  minZ: BEDROOM.ORIGIN.z - BEDROOM.DEPTH / 2,
-  maxZ: BEDROOM.ORIGIN.z + BEDROOM.DEPTH / 2,
+  maxY: APARTMENT.HEIGHT,
+  minZ: APARTMENT.ORIGIN.z - APARTMENT.DEPTH / 2,
+  maxZ: APARTMENT.ORIGIN.z + APARTMENT.DEPTH / 2,
 };
-const rangeBounds = {
-  minX: RANGE.ORIGIN.x - RANGE.WIDTH / 2,
-  maxX: RANGE.ORIGIN.x + RANGE.WIDTH / 2,
+const runwayBounds = {
+  minX: RUNWAY.ORIGIN.x - RUNWAY.WIDTH / 2,
+  maxX: RUNWAY.ORIGIN.x + RUNWAY.WIDTH / 2,
   minY: 0,
-  maxY: RANGE.HEIGHT,
-  minZ: RANGE.ORIGIN.z - RANGE.DEPTH / 2,
-  maxZ: RANGE.ORIGIN.z + RANGE.DEPTH / 2,
+  maxY: RUNWAY.HEIGHT,
+  minZ: RUNWAY.ORIGIN.z - RUNWAY.DEPTH / 2,
+  maxZ: RUNWAY.ORIGIN.z + RUNWAY.DEPTH / 2,
 };
 
 // --- Fade overlay ---
@@ -201,7 +218,6 @@ function fadeFromBlack() {
   });
 }
 
-// --- White flash for celebration ---
 function whiteFlash() {
   return new Promise(resolve => {
     fadeOverlay.style.background = '#fff';
@@ -216,55 +232,68 @@ function whiteFlash() {
   });
 }
 
-// --- Range spawn point ---
-const rangeSpawn = new THREE.Vector3(RANGE.ORIGIN.x, 0, RANGE.ORIGIN.z + RANGE.DEPTH / 2 - 2);
+// --- Reset Camera button ---
+const resetCamBtn = document.getElementById('reset-camera-btn');
+if (resetCamBtn) {
+  resetCamBtn.addEventListener('click', () => {
+    thirdPerson.resetCameraBehind();
+  });
+}
+
+// Show/hide reset camera button based on game state
+function updateResetCameraBtn() {
+  if (resetCamBtn) {
+    const show = fsm.is(STATES.APARTMENT) || fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE);
+    resetCamBtn.style.display = show ? 'block' : 'none';
+  }
+}
+
+// --- Runway spawn point ---
+const runwaySpawn = new THREE.Vector3(RUNWAY.ORIGIN.x, 0, RUNWAY.ORIGIN.z + RUNWAY.DEPTH / 2 - 2);
+
+// --- E key for posing on runway (desktop) ---
+if (!isMobile) {
+  document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'e' && fsm.is(STATES.RUNWAY_WALK)) {
+      // If currently posing, release the pose
+      if (poseSystem.isPosing()) {
+        poseSystem.tryPose(); // toggles off
+        resetPose(character);
+        thirdPerson.enable();
+      } else {
+        poseSystem.tryPose(); // toggles on
+      }
+    }
+  });
+}
 
 // --- Pointer lock on click for third-person (desktop only) ---
 if (!isMobile) {
   renderer.domElement.addEventListener('click', () => {
-    // In third-person states, request pointer lock on click
-    if (fsm.is(STATES.BEDROOM) || fsm.is(STATES.PICKUP_RIFLE) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
+    if (fsm.is(STATES.APARTMENT) || fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
       if (!document.pointerLockElement) {
         renderer.domElement.requestPointerLock();
-      }
-    }
-    // In shooting state, handle shooting
-    if (fsm.is(STATES.SHOOTING) && shootingSystem.enabled) {
-      if (!document.pointerLockElement) {
-        renderer.domElement.requestPointerLock();
-        return;
-      }
-      const result = shootingSystem.shoot();
-      if (result === 'yes') {
-        yesHitCount++;
-        hud.showHitCounter(yesHitCount, YES_HITS_REQUIRED);
-        if (yesHitCount >= YES_HITS_REQUIRED) {
-          fsm.transition(STATES.CELEBRATION);
-        } else {
-          sendTelegram(`She hit YES! (${yesHitCount}/${YES_HITS_REQUIRED} targets) \uD83C\uDFAF`);
-        }
-      } else if (result && result.type === 'no') {
-        targetDodge.onShootAtNo(result.target);
       }
     }
   });
 }
 
 // --- State transitions ---
-fsm.on(STATES.BEDROOM, () => {
-  bedroomScene.visible = true;
-  rangeScene.visible = false;
+fsm.on(STATES.APARTMENT, () => {
+  apartmentScene.visible = true;
+  runwayScene.visible = false;
 
-  thirdPerson.setColliders([...(bedroomScene.userData.colliders || [])]);
-  thirdPerson.setCameraBounds(bedroomBounds);
+  thirdPerson.setColliders([...(apartmentScene.userData.colliders || [])]);
+  thirdPerson.setCameraBounds(apartmentBounds);
   thirdPerson.enable();
   interaction.enable();
+  updateResetCameraBtn();
 
   // Update door prompt based on outfit state
   if (gameState.outfitChanged) {
-    doorTrigger.userData.promptText = 'Press E to exit house and go to range';
+    doorTrigger.userData.promptText = 'Press E to head to the runway';
   } else {
-    doorTrigger.userData.promptText = 'Please change into shooting outfit from wardrobe to go to range!';
+    doorTrigger.userData.promptText = 'Please change into runway outfit from wardrobe first!';
   }
   interaction.setInteractables([doorTrigger]);
 
@@ -275,42 +304,38 @@ fsm.on(STATES.BEDROOM, () => {
     interaction.setTertiaryInteractables([]);
   }
 
-  // Dog petting interaction
-  if (dogGroup) {
-    interaction.setPetInteractables([dogGroup]);
+  // Cat petting interaction (once cat is added)
+  if (catGroup) {
+    interaction.setPetInteractables([catGroup]);
   }
 });
 
 interaction.onInteract = (type) => {
-  if (type === 'door_to_range' && fsm.is(STATES.BEDROOM)) {
-    if (!gameState.outfitChanged) {
-      // Prompt already shows the outfit message — just don't transition
-      return;
-    }
-    fsm.transition(STATES.ENTERING_RANGE);
+  if (type === 'door_to_runway' && fsm.is(STATES.APARTMENT)) {
+    if (!gameState.outfitChanged) return;
+    fsm.transition(STATES.ENTERING_RUNWAY);
   }
-  if (type === 'door_to_bedroom' && (fsm.is(STATES.PICKUP_RIFLE) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE))) {
-    fsm.transition(STATES.RETURNING_BEDROOM);
+  if (type === 'door_to_apartment' && (fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE))) {
+    fsm.transition(STATES.RETURNING_APARTMENT);
   }
-  if (type === 'rifle' && fsm.is(STATES.PICKUP_RIFLE)) {
-    fsm.transition(STATES.SHOOTING);
+  if (type === 'pose_spot' && fsm.is(STATES.RUNWAY_WALK)) {
+    poseSystem.tryPose();
   }
 };
 
 interaction.onSecondaryInteract = (type) => {
-  if (type === 'guidelines') {
+  if (type === 'gossip_girl_card') {
     guidelinesOverlay.show();
   }
 };
 
 interaction.onTertiaryInteract = (type) => {
-  if (type === 'wardrobe' && fsm.is(STATES.BEDROOM) && !gameState.outfitChanged) {
-    swapOutfit(character, 'shooting');
+  if (type === 'wardrobe' && fsm.is(STATES.APARTMENT) && !gameState.outfitChanged) {
+    swapOutfit(character, 'runway');
     gameState.outfitChanged = true;
     interaction.setTertiaryInteractables([]);
-    // Update door prompt now that outfit is changed
-    doorTrigger.userData.promptText = 'Press E to exit house and go to range';
-    interaction.showPrompt('Changed into shooting outfit!');
+    doorTrigger.userData.promptText = 'Press E to head to the runway';
+    interaction.showPrompt('Changed into runway outfit!');
     setTimeout(() => interaction.hidePrompt(), 2000);
   }
 };
@@ -319,75 +344,89 @@ interaction.onTertiaryInteract = (type) => {
 let petAnimTimer = 0;
 let isPettingAnim = false;
 
-interaction.onPetInteract = (dogObj) => {
-  if (!dogAI || dogAI.isPetting() || isPettingAnim) return;
-  dogAI.startPetting();
+interaction.onPetInteract = (catObj) => {
+  if (!catAI || catAI.isPetting() || isPettingAnim) return;
+  catAI.startPetting();
   isPettingAnim = true;
   petAnimTimer = 2.5;
-  interaction.showPrompt('Petting Bruno...');
+  interaction.showPrompt('Petting Nugget...');
 };
 
-fsm.on(STATES.ENTERING_RANGE, async () => {
+let ggBlastFirstView = true;
+
+fsm.on(STATES.ENTERING_RUNWAY, async () => {
   thirdPerson.disable();
   interaction.disable();
 
-  // Exit pointer lock during transition (desktop only)
   if (!isMobile && document.pointerLockElement) {
     document.exitPointerLock();
   }
 
   await fadeToBlack();
 
-  // Switch scene visibility
-  bedroomScene.visible = false;
-  rangeScene.visible = true;
+  apartmentScene.visible = false;
+  runwayScene.visible = true;
 
-  // Teleport to range
-  gameState.playerPosition.copy(rangeSpawn);
-  character.position.copy(rangeSpawn);
-  gameState.inRange = true;
+  gameState.playerPosition.copy(runwaySpawn);
+  character.position.copy(runwaySpawn);
+  gameState.inRunway = true;
 
-  // Face down the range (-Z direction)
-  // azimuth=0 puts camera at +Z looking toward -Z (down range)
   thirdPerson.azimuth = 0;
   character.rotation.y = Math.PI;
 
-  thirdPerson.setColliders([...(rangeScene.userData.colliders || [])]);
-  thirdPerson.setCameraBounds(rangeBounds);
+  thirdPerson.setColliders([...(runwayScene.userData.colliders || [])]);
+  thirdPerson.setCameraBounds(runwayBounds);
 
   await fadeFromBlack();
 
-  // Show guidelines on first visit, skip on re-entry
-  if (guidelinesFirstView) {
-    fsm.transition(STATES.GUIDELINES);
+  if (ggBlastFirstView) {
+    fsm.transition(STATES.GOSSIP_GIRL_BLAST);
   } else {
-    fsm.transition(STATES.PICKUP_RIFLE);
+    fsm.transition(STATES.RUNWAY_WALK);
   }
 });
 
-fsm.on(STATES.GUIDELINES, () => {
+fsm.on(STATES.GOSSIP_GIRL_BLAST, () => {
   thirdPerson.disable();
   guidelinesOverlay.show();
 });
 
-let guidelinesFirstView = true;
 guidelinesOverlay.onClose = () => {
-  if (guidelinesFirstView) {
-    guidelinesFirstView = false;
-    fsm.transition(STATES.PICKUP_RIFLE);
+  if (ggBlastFirstView) {
+    ggBlastFirstView = false;
+    fsm.transition(STATES.RUNWAY_WALK);
   }
 };
 
-fsm.on(STATES.PICKUP_RIFLE, () => {
+fsm.on(STATES.RUNWAY_WALK, () => {
   thirdPerson.azimuth = 0;
-  thirdPerson.setCameraBounds(rangeBounds);
+  thirdPerson.setCameraBounds(runwayBounds);
   thirdPerson.enable();
   interaction.enable();
-  interaction.setInteractables([rangeScene.userData.rifle, rangeDoorTrigger]);
-  interaction.setSecondaryInteractables([rangeScene.userData.clipboard]);
+  updateResetCameraBtn();
+
+  const interactables = [runwayDoorTrigger];
+  interaction.setInteractables(interactables);
+
+  // GG card for re-reading
+  const ggCard = runwayScene.userData.ggCard;
+  if (ggCard) {
+    interaction.setSecondaryInteractables([ggCard]);
+  }
+
+  // Enable pose and dodge systems
+  poseSystem.enable();
+  spotDodgeSystem.enable();
+
+  hud.showHitCounter(poseCount, POSES_REQUIRED);
+
+  if (isMobile) {
+    const poseBtnEl = document.getElementById('mobile-pose-btn');
+    if (poseBtnEl) poseBtnEl.style.display = 'block';
+  }
 });
 
-fsm.on(STATES.RETURNING_BEDROOM, async () => {
+fsm.on(STATES.RETURNING_APARTMENT, async () => {
   thirdPerson.disable();
   interaction.disable();
 
@@ -395,144 +434,79 @@ fsm.on(STATES.RETURNING_BEDROOM, async () => {
     document.exitPointerLock();
   }
 
+  if (isMobile) {
+    const poseBtnEl = document.getElementById('mobile-pose-btn');
+    if (poseBtnEl) poseBtnEl.style.display = 'none';
+  }
+
   await fadeToBlack();
 
-  // Switch scenes
-  rangeScene.visible = false;
-  bedroomScene.visible = true;
+  runwayScene.visible = false;
+  apartmentScene.visible = true;
 
-  // Teleport to bedroom center
-  const bedroomPos = new THREE.Vector3(PLAYER.SPAWN.x, 0, PLAYER.SPAWN.z);
-  gameState.playerPosition.copy(bedroomPos);
-  character.position.copy(bedroomPos);
-  gameState.inRange = false;
+  const apartmentPos = new THREE.Vector3(PLAYER.SPAWN.x, 0, PLAYER.SPAWN.z);
+  gameState.playerPosition.copy(apartmentPos);
+  character.position.copy(apartmentPos);
+  gameState.inRunway = false;
 
   thirdPerson.azimuth = 0;
   character.rotation.y = 0;
 
-  thirdPerson.setColliders([...(bedroomScene.userData.colliders || [])]);
-  thirdPerson.setCameraBounds(bedroomBounds);
+  thirdPerson.setColliders([...(apartmentScene.userData.colliders || [])]);
+  thirdPerson.setCameraBounds(apartmentBounds);
 
   await fadeFromBlack();
 
-  fsm.transition(STATES.BEDROOM);
+  fsm.transition(STATES.APARTMENT);
 });
 
-fsm.on(STATES.SHOOTING, () => {
-  thirdPerson.disable();
-  interaction.disable();
+// --- Pose handling ---
+function onPoseStruck() {
+  poseCount++;
+  hud.showHitCounter(poseCount, POSES_REQUIRED);
 
-  // Request pointer lock (desktop only)
-  if (!isMobile) {
-    renderer.domElement.requestPointerLock();
+  // Pose animation — hold until player presses E again
+  poseCharacter(character, poseCount - 1);
+  thirdPerson.disable(); // freeze movement while posing
+
+  if (poseCount >= POSES_REQUIRED) {
+    // Auto-release pose after a brief moment then celebrate
+    setTimeout(() => {
+      resetPose(character);
+      fsm.transition(STATES.CELEBRATION);
+    }, 1500);
+  } else {
+    sendTelegram(`\uD83D\uDCF8 [UES] Akshita struck a pose! (${poseCount}/${POSES_REQUIRED}) \uD83D\uDC83`);
   }
-
-  // Hide character
-  character.visible = false;
-
-  // Position camera at shooting position (standing at bench)
-  const shootPos = new THREE.Vector3(
-    RANGE.ORIGIN.x,
-    PLAYER.HEIGHT,
-    RANGE.ORIGIN.z + RANGE.DEPTH / 2 - 3
-  );
-
-  // Hide rifle from table
-  if (rangeScene.userData.rifle) {
-    rangeScene.userData.rifle.visible = false;
-  }
-
-  // Create FPS rifle attached to camera
-  const fpsRifle = createFPSRifle();
-  camera.add(fpsRifle);
-  scene.add(camera); // needed to render camera children
-  shootingSystem.rifleModel = fpsRifle;
-
-  // Transition camera — both start and end look down the range (-Z)
-  const startPos = camera.position.clone();
-  const lookTarget = new THREE.Vector3(
-    RANGE.ORIGIN.x,
-    PLAYER.HEIGHT,
-    RANGE.ORIGIN.z - RANGE.DEPTH / 2
-  );
-  const startLook = lookTarget.clone();
-  const endLook = lookTarget.clone();
-
-  transition.startTransition(startPos, shootPos, startLook, endLook, 1, () => {
-    firstPerson.rifleModel = fpsRifle;
-    firstPerson.enable(0);
-    shootingSystem.enable();
-    targetDodge.enable();
-    hud.showCrosshair();
-    hud.showHitCounter(yesHitCount, YES_HITS_REQUIRED);
-    if (isMobile) {
-      // Show FPS mobile buttons and aim hint, hide joystick
-      document.getElementById('mobile-shoot-btn').style.display = 'block';
-      document.getElementById('mobile-aim-btn').style.display = 'block';
-      document.getElementById('mobile-aim-hint').style.display = 'block';
-      document.getElementById('mobile-joystick-zone').style.display = 'none';
-      // Expand camera zone to full screen for FPS aiming
-      const camZone = document.getElementById('mobile-camera-zone');
-      camZone.style.width = '100%';
-      camZone.style.left = '0';
-      camZone.style.right = '0';
-      // Fade out aim hint after a few seconds
-      setTimeout(() => {
-        const hint = document.getElementById('mobile-aim-hint');
-        if (hint) hint.style.display = 'none';
-      }, 4000);
-    } else {
-      // Show focus hint briefly
-      const focusHint = document.getElementById('focus-hint');
-      focusHint.textContent = 'Press F to focus / zoom in';
-      focusHint.style.display = 'block';
-      setTimeout(() => { focusHint.style.display = 'none'; }, 4000);
-    }
-  });
-
-  gameState.riflePickedUp = true;
-});
-
-shootingSystem.onHitYes = () => {
-  // handled by click event
-};
+}
 
 fsm.on(STATES.CELEBRATION, async () => {
-  shootingSystem.disable();
-  targetDodge.disable();
-  firstPerson.disable();
-  hud.hideCrosshair();
+  thirdPerson.disable();
+  interaction.disable();
+  poseSystem.disable();
+  spotDodgeSystem.disable();
+  hud.hideHitCounter();
 
   if (isMobile) {
-    document.getElementById('mobile-shoot-btn').style.display = 'none';
-    document.getElementById('mobile-aim-btn').style.display = 'none';
-    document.getElementById('mobile-aim-hint').style.display = 'none';
-    // Reset camera zone back to right half for third-person
-    const camZone = document.getElementById('mobile-camera-zone');
-    camZone.style.width = '50%';
-    camZone.style.left = '';
-    camZone.style.right = '0';
+    const poseBtnEl = document.getElementById('mobile-pose-btn');
+    if (poseBtnEl) poseBtnEl.style.display = 'none';
   }
 
-  // Exit pointer lock
   if (document.pointerLockElement) {
     document.exitPointerLock();
   }
 
   await whiteFlash();
 
-  // Start confetti
   celebration.startConfetti(new THREE.Vector3(
-    RANGE.ORIGIN.x,
+    RUNWAY.ORIGIN.x,
     PLAYER.HEIGHT + 1,
-    RANGE.ORIGIN.z
+    RUNWAY.ORIGIN.z
   ));
 
-  // Show message
   celebrationOverlay.show();
 
-  // Final notification
-  sendTelegram("She shot all 3 YES targets! Valentine invite accepted! \u2764\uFE0F");
+  sendTelegram("\uD83D\uDCF8 Akshita struck all 3 poses! Valentine invite accepted! \u2764\uFE0F\uD83D\uDC83");
 });
 
 celebrationOverlay.onContinue = () => {
@@ -540,35 +514,25 @@ celebrationOverlay.onContinue = () => {
 };
 
 fsm.on(STATES.POST_CELEBRATION, () => {
-  // Decorate range
-  celebration.decorateRange(rangeScene);
+  celebration.decorateRunway(runwayScene);
 
   if (isMobile) {
     document.getElementById('mobile-joystick-zone').style.display = 'block';
   }
 
-  // Remove FPS rifle from camera
-  while (camera.children.length > 0) {
-    camera.remove(camera.children[0]);
-  }
-
-  // Show character again
   character.visible = true;
-  character.position.copy(rangeSpawn);
-  gameState.playerPosition.copy(rangeSpawn);
+  character.position.copy(runwaySpawn);
+  gameState.playerPosition.copy(runwaySpawn);
 
-  // Back to third person
-  thirdPerson.setColliders(rangeScene.userData.colliders || []);
-  thirdPerson.setCameraBounds(rangeBounds);
+  thirdPerson.setColliders(runwayScene.userData.colliders || []);
+  thirdPerson.setCameraBounds(runwayBounds);
   thirdPerson.azimuth = 0;
   thirdPerson.enable();
   interaction.enable();
-  interaction.setInteractables([rangeDoorTrigger]);
-  interaction.setSecondaryInteractables([rangeScene.userData.clipboard]);
+  interaction.setInteractables([runwayDoorTrigger]);
 
-  gameState.rangeDecorated = true;
+  gameState.runwayDecorated = true;
 
-  // After a brief moment, show share
   setTimeout(() => {
     fsm.transition(STATES.SHARE);
   }, 2000);
@@ -586,9 +550,8 @@ const keyInput = document.getElementById('key-input');
 const keyError = document.getElementById('key-error');
 const keySubmit = document.getElementById('key-submit');
 
-const SECRET_KEY = 'OnionRingsOnFirst';
+const SECRET_KEY = 'ComeToDaddy';
 
-// Simulate brief load
 setTimeout(() => {
   loadingScreen.classList.add('hidden');
   startScreen.classList.remove('hidden');
@@ -612,7 +575,7 @@ function attemptKeyEntry() {
   if (val === SECRET_KEY) {
     keyScreen.classList.remove('visible');
     keyScreen.style.display = 'none';
-    fsm.transition(STATES.BEDROOM);
+    fsm.transition(STATES.APARTMENT);
   } else {
     keyError.textContent = 'That\'s not it. Try again.';
     keyInput.classList.add('shake');
@@ -631,7 +594,6 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-// Also listen for orientation change on mobile
 if (isMobile) {
   window.addEventListener('orientationchange', () => {
     setTimeout(() => {
@@ -650,10 +612,10 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const time = clock.getElapsedTime();
 
-  // Inject dynamic dog collider into bedroom colliders each frame
-  if (fsm.is(STATES.BEDROOM) && dogAI) {
-    const staticColliders = bedroomScene.userData.colliders || [];
-    thirdPerson.setColliders([...staticColliders, dogAI.getCollider()]);
+  // Inject dynamic cat collider into apartment colliders each frame
+  if (fsm.is(STATES.APARTMENT) && catAI) {
+    const staticColliders = apartmentScene.userData.colliders || [];
+    thirdPerson.setColliders([...staticColliders, catAI.getCollider()]);
   }
 
   // Feed mobile inputs each frame
@@ -661,20 +623,18 @@ function animate() {
     const dir = joystick.getDirection();
     const camDelta = touchCam.consumeDelta();
 
-    if (fsm.is(STATES.BEDROOM) || fsm.is(STATES.PICKUP_RIFLE) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
+    if (fsm.is(STATES.APARTMENT) || fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
       thirdPerson.setMobileInput(dir.dx, dir.dz);
       thirdPerson.setMobileCameraInput(camDelta.x, camDelta.y);
-    } else if (fsm.is(STATES.SHOOTING)) {
-      firstPerson.setMobileLookInput(camDelta.x, camDelta.y);
     }
   }
 
   // State-dependent updates
-  if (fsm.is(STATES.BEDROOM) || fsm.is(STATES.PICKUP_RIFLE) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
+  if (fsm.is(STATES.APARTMENT) || fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
     const result = thirdPerson.update(dt, gameState.playerPosition);
     gameState.isMoving = result.isMoving;
 
-    // Petting animation: bob the right arm up/down
+    // Petting animation
     if (isPettingAnim) {
       petAnimTimer -= dt;
       const { rightArm } = character.userData;
@@ -686,22 +646,14 @@ function animate() {
         if (rightArm) rightArm.rotation.x = 0;
         interaction.hidePrompt();
       }
-      // Don't run normal walk animation during petting
       animateCharacter(character, time, false);
     } else {
       animateCharacter(character, time, gameState.isMoving);
     }
 
-    if (fsm.is(STATES.BEDROOM) || fsm.is(STATES.PICKUP_RIFLE) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
+    if (fsm.is(STATES.APARTMENT) || fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE)) {
       interaction.update(gameState.playerPosition);
     }
-  }
-
-  if (fsm.is(STATES.SHOOTING)) {
-    firstPerson.update(dt);
-    shootingSystem.update(dt);
-    const aimRay = shootingSystem.getAimRay();
-    targetDodge.update(dt, aimRay);
   }
 
   // Transition system always updates
@@ -710,10 +662,21 @@ function animate() {
   // Celebration always updates
   celebration.update(dt);
 
-  // Dog AI (only when bedroom visible)
-  if (bedroomScene.visible && dogAI) {
-    dogAI.setPlayerPos(gameState.playerPosition);
-    dogAI.update(dt, time);
+  // Cat AI (only when apartment visible)
+  if (apartmentScene.visible && catAI) {
+    catAI.setPlayerPos(gameState.playerPosition);
+    catAI.update(dt, time);
+  }
+
+  // Pose and spot dodge systems
+  if (fsm.is(STATES.RUNWAY_WALK)) {
+    poseSystem.update(dt);
+    spotDodgeSystem.update(dt, gameState.playerPosition);
+  }
+
+  // Photographer flashes (when runway is visible)
+  if (runwayScene.visible && (fsm.is(STATES.RUNWAY_WALK) || fsm.is(STATES.POST_CELEBRATION) || fsm.is(STATES.SHARE))) {
+    updatePhotographerFlashes(dt);
   }
 
   renderer.render(scene, camera);

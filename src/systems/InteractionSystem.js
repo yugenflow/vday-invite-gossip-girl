@@ -186,7 +186,7 @@ export class InteractionSystem {
         lines.push(closestTertiary.userData.tertiaryPromptText || 'Press C to interact');
       }
       if (closestPet) {
-        lines.push('Press P to Pet Bruno!');
+        lines.push('Press P to Pet Nugget!');
       }
       if (lines.length > 0) {
         this.showPrompt(lines.join('  |  '));
@@ -204,7 +204,7 @@ export class InteractionSystem {
       { el: btns[0], obj: primary, label: primary ? (primary.userData.promptText || 'Interact').replace(/^Press E (to )?/i, '') : '' },
       { el: btns[1], obj: secondary, label: secondary ? (secondary.userData.secondaryPromptText || 'Read').replace(/^Press R (to )?/i, '') : '' },
       { el: btns[2], obj: tertiary, label: tertiary ? (tertiary.userData.tertiaryPromptText || 'Use').replace(/^Press C (to )?/i, '') : '' },
-      { el: btns[3], obj: pet, label: 'Pet Bruno!' },
+      { el: btns[3], obj: pet, label: 'Pet Nugget!' },
     ];
     let anyVisible = false;
     for (const item of items) {

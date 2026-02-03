@@ -18,12 +18,11 @@ export class ShareOverlay {
   }
 
   copyToClipboard() {
-    const message = `I just got the most creative Valentine's invite ever! Check it out: ${window.location.href}`;
+    const message = `Spotted: I just got the most fabulous Valentine's invite on the Upper East Side! XOXO ${window.location.href}`;
     navigator.clipboard.writeText(message).then(() => {
       this.toast.classList.add('visible');
       setTimeout(() => this.toast.classList.remove('visible'), 2000);
     }).catch(() => {
-      // Fallback
       const ta = document.createElement('textarea');
       ta.value = message;
       document.body.appendChild(ta);

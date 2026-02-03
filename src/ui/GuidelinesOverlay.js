@@ -1,4 +1,4 @@
-import guidelinesText from '../../guidelines.txt?raw';
+import guidelinesText from '../../gossipgirlblast.txt?raw';
 
 export class GuidelinesOverlay {
   constructor() {
@@ -22,14 +22,18 @@ export class GuidelinesOverlay {
       const trimmed = line.trim();
       if (!trimmed) {
         html += '<div style="height: 12px;"></div>';
+      } else if (trimmed === 'GOSSIP GIRL BLAST') {
+        html += `<p style="margin: 0 0 12px; font-size: 0.9rem; letter-spacing: 5px; text-transform: uppercase; color: #FFD700; text-align: center;">${trimmed}</p>`;
       } else if (/^\d+\./.test(trimmed)) {
-        html += `<p style="margin: 6px 0; padding-left: 8px; line-height: 1.7; white-space: nowrap;">${trimmed}</p>`;
+        html += `<p style="margin: 8px 0; padding-left: 10px; line-height: 1.8; font-size: 1.1rem;">${trimmed}</p>`;
       } else if (trimmed.startsWith('Note:')) {
-        html += `<p style="margin: 14px 0 4px; font-style: italic; font-size: 0.88rem; color: #5a3a1a; line-height: 1.7;">${trimmed}</p>`;
-      } else if (trimmed.startsWith('Lastly')) {
-        html += `<p style="margin: 14px 0 4px; font-weight: bold; color: #5a2e10; line-height: 1.7;">${trimmed}</p>`;
+        html += `<p style="margin: 16px 0 6px; font-style: italic; font-size: 1rem; color: #999; line-height: 1.8;">${trimmed}</p>`;
+      } else if (trimmed.startsWith('XOXO')) {
+        html += `<p style="margin: 16px 0 6px; font-weight: bold; color: #FFD700; line-height: 1.8; text-align: center; font-size: 1.15rem;">${trimmed}</p>`;
+      } else if (trimmed.startsWith('And remember')) {
+        html += `<p style="margin: 16px 0 6px; font-weight: bold; color: #FFD700; line-height: 1.8; font-size: 1.1rem;">${trimmed}</p>`;
       } else {
-        html += `<p style="margin: 4px 0; line-height: 1.7;">${trimmed}</p>`;
+        html += `<p style="margin: 6px 0; line-height: 1.8; font-size: 1.1rem;">${trimmed}</p>`;
       }
     }
     return html;

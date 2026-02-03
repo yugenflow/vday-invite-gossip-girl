@@ -58,12 +58,12 @@ export class CelebrationSystem {
     this.scene.add(this.confetti);
   }
 
-  decorateRange(rangeGroup) {
-    // Remove targets
-    const targets = rangeGroup.userData.targets || [];
-    targets.forEach(t => rangeGroup.remove(t));
+  decorateRunway(runwayGroup) {
+    // Remove pose spots
+    const poseSpots = runwayGroup.userData.poseSpots || [];
+    poseSpots.forEach(s => runwayGroup.remove(s));
 
-    // Add hearts — shape drawn point-up, we want point-down (normal heart)
+    // Add hearts
     const heartShape = new THREE.Shape();
     heartShape.moveTo(0, -0.35);
     heartShape.bezierCurveTo(0.05, -0.1, 0.35, 0, 0.35, 0.2);
@@ -76,11 +76,9 @@ export class CelebrationSystem {
     });
 
     const heartColors = [COLORS.HEART_RED, COLORS.HEART_PINK, 0xFF1493, 0xFFB6C1];
+    const roz = runwayGroup.userData?.runwayOriginZ || -25;
 
-    // Use range origin for positioning
-    const roz = rangeGroup.userData?.rangeOriginZ || -25;
-
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
       const color = heartColors[i % heartColors.length];
       const heart = new THREE.Mesh(
         heartGeo,
@@ -92,41 +90,69 @@ export class CelebrationSystem {
           side: THREE.DoubleSide,
         })
       );
-      const x = (Math.random() - 0.5) * 6;
-      const y = 1.5 + Math.random() * 2;
-      const z = roz - 10 + Math.random() * 15;
+      const x = (Math.random() - 0.5) * 8;
+      const y = 1.5 + Math.random() * 2.5;
+      const z = roz - 10 + Math.random() * 18;
       heart.position.set(x, y, z);
       heart.rotation.y = Math.random() * Math.PI;
-      const s = 0.5 + Math.random() * 0.5;
+      const s = 0.4 + Math.random() * 0.5;
       heart.scale.set(s, s, s);
       this.decorations.add(heart);
     }
 
-    // Fairy lights across range
+    // Fairy lights
     const fl1 = createCelebrationFairyLights(
-      new THREE.Vector3(-3, 3.5, roz + 5),
-      new THREE.Vector3(3, 3.5, roz + 5),
-      15
+      new THREE.Vector3(-4, 4.5, roz + 5),
+      new THREE.Vector3(4, 4.5, roz + 5),
+      18
     );
     this.decorations.add(fl1);
 
     const fl2 = createCelebrationFairyLights(
-      new THREE.Vector3(-3, 3.5, roz - 5),
-      new THREE.Vector3(3, 3.5, roz - 5),
-      15
+      new THREE.Vector3(-4, 4.5, roz - 5),
+      new THREE.Vector3(4, 4.5, roz - 5),
+      18
     );
     this.decorations.add(fl2);
 
-    // Warm pink lighting
-    const pinkLight1 = new THREE.PointLight(0xFF6688, 0.8, 20);
-    pinkLight1.position.set(0, 3, roz + 5);
-    this.decorations.add(pinkLight1);
+    // Rose petals (scattered small particles on the floor)
+    const petalCount = 100;
+    const petalPositions = new Float32Array(petalCount * 3);
+    const petalColors = new Float32Array(petalCount * 3);
+    const petalCol = [
+      new THREE.Color(COLORS.ROSE_PETAL),
+      new THREE.Color(COLORS.HEART_PINK),
+      new THREE.Color(0xFFB6C1),
+    ];
+    for (let i = 0; i < petalCount; i++) {
+      petalPositions[i * 3] = (Math.random() - 0.5) * 8;
+      petalPositions[i * 3 + 1] = 0.15 + Math.random() * 0.1;
+      petalPositions[i * 3 + 2] = roz - 12 + Math.random() * 22;
+      const c = petalCol[Math.floor(Math.random() * petalCol.length)];
+      petalColors[i * 3] = c.r;
+      petalColors[i * 3 + 1] = c.g;
+      petalColors[i * 3 + 2] = c.b;
+    }
+    const petalGeo = new THREE.BufferGeometry();
+    petalGeo.setAttribute('position', new THREE.BufferAttribute(petalPositions, 3));
+    petalGeo.setAttribute('color', new THREE.BufferAttribute(petalColors, 3));
+    const petalMat = new THREE.PointsMaterial({ size: 0.06, vertexColors: true });
+    this.decorations.add(new THREE.Points(petalGeo, petalMat));
 
-    const pinkLight2 = new THREE.PointLight(0xFFAA44, 0.6, 15);
-    pinkLight2.position.set(0, 3, roz - 10);
-    this.decorations.add(pinkLight2);
+    // Warm pink/gold lighting
+    const pinkLight = new THREE.PointLight(0xFF6688, 0.8, 20);
+    pinkLight.position.set(0, 4, roz + 5);
+    this.decorations.add(pinkLight);
 
-    rangeGroup.add(this.decorations);
+    const goldLight = new THREE.PointLight(0xFFD700, 0.5, 15);
+    goldLight.position.set(0, 4, roz - 5);
+    this.decorations.add(goldLight);
+
+    const warmLight = new THREE.PointLight(0xFFAA44, 0.4, 15);
+    warmLight.position.set(0, 3, roz);
+    this.decorations.add(warmLight);
+
+    runwayGroup.add(this.decorations);
   }
 
   update(dt) {
@@ -135,13 +161,12 @@ export class CelebrationSystem {
     const positions = this.confetti.geometry.attributes.position.array;
     for (let i = 0; i < this.confettiVelocities.length; i++) {
       const vel = this.confettiVelocities[i];
-      vel.y -= 3 * dt; // gravity
+      vel.y -= 3 * dt;
 
       positions[i * 3] += vel.x * dt;
       positions[i * 3 + 1] += vel.y * dt;
       positions[i * 3 + 2] += vel.z * dt;
 
-      // Bounce off floor
       if (positions[i * 3 + 1] < 0.05) {
         positions[i * 3 + 1] = 0.05;
         vel.y = Math.abs(vel.y) * 0.3;
@@ -151,7 +176,6 @@ export class CelebrationSystem {
     }
     this.confetti.geometry.attributes.position.needsUpdate = true;
 
-    // Slowly fade out confetti
     if (this.confetti.material.opacity > 0) {
       this.confetti.material.opacity -= dt * 0.15;
       if (this.confetti.material.opacity <= 0) {

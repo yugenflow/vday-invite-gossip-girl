@@ -12,7 +12,7 @@ export class ThirdPersonController {
     this.azimuth = 0; // horizontal angle
     this.elevation = 0.3; // vertical angle
     this.distance = 3;
-    this.cameraBounds = null; // { minX, maxX, minY, maxY, minZ, maxZ }
+    this.cameraBounds = null;
 
     this.keys = { w: false, a: false, s: false, d: false };
     this.isMoving = false;
@@ -21,7 +21,11 @@ export class ThirdPersonController {
 
     this.targetRotation = 0;
 
-    // Mobile input state (set externally each frame)
+    // Camera auto-reset: drift back behind player after idle
+    this._lastMouseMoveTime = 0;
+    this._autoResetDelay = 2.0; // seconds of no input before auto-reset
+
+    // Mobile input state
     this._mobileDx = 0;
     this._mobileDz = 0;
 
@@ -51,6 +55,12 @@ export class ThirdPersonController {
     this.cameraBounds = bounds;
   }
 
+  // Reset camera to behind the character immediately
+  resetCameraBehind() {
+    // Target azimuth is opposite of character facing direction
+    this.azimuth = this.character.rotation.y + Math.PI;
+  }
+
   _onKeyDown(e) {
     if (!this.enabled) return;
     const key = e.key.toLowerCase();
@@ -75,19 +85,19 @@ export class ThirdPersonController {
     if (!this.enabled) return;
     this.azimuth -= e.movementX * 0.003;
     this.elevation = clamp(this.elevation + e.movementY * 0.003, -0.2, 1.2);
+    this._lastMouseMoveTime = performance.now() / 1000;
   }
 
-  /** Called each frame from mobile joystick. dx/dz in -1..1 */
   setMobileInput(dx, dz) {
     this._mobileDx = dx;
     this._mobileDz = dz;
   }
 
-  /** Called each frame from touch camera drag. Raw pixel deltas. */
   setMobileCameraInput(deltaX, deltaY) {
     if (!this.enabled) return;
     this.azimuth -= deltaX * 0.004;
     this.elevation = clamp(this.elevation + deltaY * 0.004, -0.2, 1.2);
+    this._lastMouseMoveTime = performance.now() / 1000;
   }
 
   checkCollision(x, z, radius = 0.3) {
@@ -109,7 +119,6 @@ export class ThirdPersonController {
 
     const moveDir = new THREE.Vector3(0, 0, 0);
     if (this.mobile) {
-      // Mobile joystick: dz negative = forward, dx positive = right
       moveDir.addScaledVector(forward, -this._mobileDz);
       moveDir.addScaledVector(right, this._mobileDx);
     } else {
@@ -127,7 +136,6 @@ export class ThirdPersonController {
       const newX = playerPos.x + moveDir.x * speed;
       const newZ = playerPos.z + moveDir.z * speed;
 
-      // Try X and Z separately for wall sliding
       if (!this.checkCollision(newX, playerPos.z)) {
         playerPos.x = newX;
       }
@@ -135,17 +143,29 @@ export class ThirdPersonController {
         playerPos.z = newZ;
       }
 
-      // Rotate character to face movement direction
       this.targetRotation = Math.atan2(moveDir.x, moveDir.z);
     }
 
     // Lerp character rotation
     let currentRot = this.character.rotation.y;
     let diff = this.targetRotation - currentRot;
-    // Normalize angle diff
     while (diff > Math.PI) diff -= Math.PI * 2;
     while (diff < -Math.PI) diff += Math.PI * 2;
     this.character.rotation.y += diff * Math.min(1, dt * 10);
+
+    // Auto camera reset: if no mouse input for _autoResetDelay seconds, drift behind player
+    const now = performance.now() / 1000;
+    const idleTime = now - this._lastMouseMoveTime;
+    if (idleTime > this._autoResetDelay) {
+      // Target azimuth: behind the character (opposite facing direction)
+      const behindAzimuth = this.character.rotation.y + Math.PI;
+      let azDiff = behindAzimuth - this.azimuth;
+      while (azDiff > Math.PI) azDiff -= Math.PI * 2;
+      while (azDiff < -Math.PI) azDiff += Math.PI * 2;
+      // Smooth drift speed
+      const driftSpeed = Math.min(1, dt * 1.5);
+      this.azimuth += azDiff * driftSpeed;
+    }
 
     // Update character position
     this.character.position.set(playerPos.x, playerPos.y, playerPos.z);

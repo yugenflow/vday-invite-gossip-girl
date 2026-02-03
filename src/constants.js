@@ -1,72 +1,80 @@
-// Colors
+// Colors — Upper East Side / Gossip Girl palette
 export const COLORS = {
-  // Bedroom
-  FLOOR_WOOD: 0xA07830,
-  WALL: 0xF2E0C8,
-  CEILING: 0xFFF0E0,
-  BED_FRAME: 0x5C3A1E,
-  BED_SHEET: 0xFFF0E0,
-  BLANKET: 0xC04040,
+  // Apartment (Blair Waldorf luxury)
+  FLOOR_WOOD: 0x8B6F5E,
+  WALL: 0xFAF0E6,
+  CEILING: 0xFFF8F0,
+  ACCENT_GOLD: 0xD4AF37,
+  ACCENT_BLUSH: 0xF5C6C6,
+  TRIM_WHITE: 0xF5F0EB,
+  BED_FRAME: 0xF5F0EB,
+  BED_SHEET: 0xFFF0F5,
+  BLANKET: 0xE8B4D0,
   PILLOW: 0xFFF5EE,
-  DESK_WOOD: 0x6B4226,
-  BOOK_RACK: 0x5C3A1E,
-  MIRROR_FRAME: 0x8B7355,
-  MIRROR_GLASS: 0xB0C4DE,
-  KEYBOARD_BLACK: 0x222222,
-  KEYBOARD_WHITE: 0xF0F0F0,
-  KEYBOARD_STAND: 0x333333,
-  DOG_BODY: 0xD4A860,
-  DOG_DARK: 0xB8924A,
-  PAINTING_FRAME: 0x5C3A1E,
-  TROPHY_GOLD: 0xFFD700,
-  TROPHY_SILVER: 0xC0C0C0,
-  LAMP_BASE: 0x333333,
-  LAMP_SHADE: 0xFFF8DC,
+  VANITY_WHITE: 0xF5F0EB,
+  VANITY_MIRROR: 0xC8D8E8,
+  VANITY_BULB: 0xFFE4B5,
+  DESIGNER_BAG_ORANGE: 0xEB6A34,
+  DESIGNER_BAG_BLACK: 0x1A1A1A,
+  DESIGNER_BAG_CREAM: 0xF5E6D0,
+  HEADBAND_SATIN: 0x2B1B5E,
+  HEADBAND_VELVET: 0x8B1A4A,
+  HEADBAND_PEARL: 0xFFF8DC,
+  SOFT_TOY_PINK: 0xFFB6C1,
+  SOFT_TOY_BROWN: 0x8B6C42,
+  MACARON_PINK: 0xF8C8DC,
+  MACARON_MINT: 0xB8E8D0,
+  MACARON_LAVENDER: 0xD8C8E8,
+  MACARON_YELLOW: 0xFFF0B0,
+  CAT_ORANGE: 0xD4881A,
+  CAT_ORANGE_LIGHT: 0xE8A030,
+  CAT_ORANGE_DARK: 0xB06A10,
+  CAT_NOSE: 0xFFB0B0,
+  PAINTING_FRAME: 0xD4AF37,
+  LAMP_BASE: 0xD4AF37,
+  LAMP_SHADE: 0xFFF8F0,
   FAIRY_LIGHT: 0xFFE4B5,
-  DOOR: 0x6B4226,
-  DOOR_FRAME: 0x4A2F1A,
+  DOOR: 0xF5F0EB,
+  DOOR_FRAME: 0xD4AF37,
+  WARDROBE_WHITE: 0xF5F0EB,
+  WARDROBE_GOLD: 0xD4AF37,
 
   // Character
   SKIN: 0xDEB887,
   HAIR: 0x1A1A1A,
-  VISOR: 0x1A1A1A,
-  JACKET_WHITE: 0xEEEEEE,
-  JACKET_RED: 0xCC2222,
-  JACKET_BLACK: 0x222222,
-  BUTTON_SILVER: 0xAAAAAA,
-  SLEEVE_RED: 0xCC2222,
-  SLEEVE_BLACK: 0x222222,
-  ELBOW_PATCH: 0x1A1A1A,
-  PANTS_RED: 0xCC2222,
-  PANTS_WHITE: 0xEEEEEE,
-  PANTS_BLACK: 0x1A1A1A,
-  BELT_RED: 0xBB2020,
-  BELT_BUCKLE: 0x999999,
-  KNEE_PAD: 0x1A1A1A,
-  BOOT: 0x222222,
-  GLOVE: 0x1A1A1A,
-  SPINE_STRIP: 0x1A1A1A,
-  BUCKLE_SILVER: 0xAAAAAA,
+  EYES: 0x222222,
 
-  // Casual outfit
-  TSHIRT_WHITE: 0xF5F5F5,
-  PAJAMA_TEAL: 0x2A9D8F,
-  SLIPPER: 0x8B6F4E,
+  // Casual outfit (blush pink pajamas)
+  PAJAMA_BLUSH: 0xF5C6C6,
+  PAJAMA_CREAM: 0xFFF0E8,
+  SLIPPER_FUZZY: 0xF5C6C6,
 
-  // Range
-  RANGE_FLOOR: 0x6A6A6A,
-  RANGE_WALL: 0xA0988E,
-  RANGE_CEILING: 0x959595,
-  LANE_DIVIDER: 0x556060,
-  BENCH: 0x6B4226,
-  TARGET_BOARD: 0xDDDDDD,
-  TARGET_YES: 0x44AA44,
-  TARGET_NO: 0xCC4444,
-  RIFLE_SILVER: 0xBBBBBB,
-  RIFLE_DARK: 0x333333,
-  RIFLE_CARBON: 0x2A2A2A,
-  RIFLE_RUBBER: 0x1A1A1A,
-  RIFLE_ALUMINUM: 0xCCCCCC,
+  // Runway outfit
+  LBD_BLACK: 0x0A0A0A,
+  BRALETTE_LACE: 0x1A1A1A,
+  BRALETTE_DETAIL: 0x333333,
+  GLASSES_FRAME: 0x0A0A0A,
+  HEEL_BLACK: 0x0A0A0A,
+  HEEL_RED_SOLE: 0xCC0000,
+  CLUTCH_GOLD: 0xD4AF37,
+
+  // Runway scene
+  RUNWAY_FLOOR: 0x0A0A0A,
+  RUNWAY_WALL: 0x1A1A2A,
+  RUNWAY_CEILING: 0x151520,
+  RUNWAY_PLATFORM: 0x0D0D0D,
+  RUNWAY_EDGE_LIGHT: 0xD4AF37,
+  SPOTLIGHT_WARM: 0xFFF0D0,
+  CAMERA_BODY: 0x333333,
+  CAMERA_LENS: 0x111111,
+  TRIPOD: 0x444444,
+  BACKDROP: 0x2A1A3A,
+
+  // Pose spots
+  POSE_SPOT_YES: 0xD4AF37,
+  POSE_SPOT_YES_GLOW: 0xFFD700,
+  POSE_SPOT_NO: 0x8B0000,
+  POSE_SPOT_NO_GLOW: 0xFF2222,
 
   // Celebration
   HEART_RED: 0xFF2255,
@@ -76,28 +84,28 @@ export const COLORS = {
   CONFETTI_GOLD: 0xFFD700,
   CONFETTI_WHITE: 0xFFFFFF,
   FAIRY_WARM: 0xFFB366,
+  ROSE_PETAL: 0xE8284B,
 };
 
 // Dimensions
-export const BEDROOM = {
-  WIDTH: 8,
-  DEPTH: 8,
-  HEIGHT: 3.5,
+export const APARTMENT = {
+  WIDTH: 7,
+  DEPTH: 7,
+  HEIGHT: 3.2,
   ORIGIN: { x: 0, y: 0, z: 0 },
 };
 
-export const RANGE = {
-  WIDTH: 8,
+export const RUNWAY = {
+  WIDTH: 10,
   DEPTH: 30,
-  HEIGHT: 4,
-  ORIGIN: { x: 0, y: 0, z: -25 }, // Spatially separated
+  HEIGHT: 5,
+  ORIGIN: { x: 0, y: 0, z: -25 },
 };
 
 export const DOOR = {
   WIDTH: 1.4,
   HEIGHT: 2.6,
-  // Door is on -Z wall of bedroom
-  POSITION: { x: 0, y: 0, z: -BEDROOM.DEPTH / 2 },
+  POSITION: { x: 0, y: 0, z: -APARTMENT.DEPTH / 2 },
 };
 
 // Player
@@ -115,20 +123,42 @@ export const CAMERA = {
   FAR: 100,
 };
 
-// Targets
-export const TARGETS = {
-  DISTANCE: 20, // from shooting position
-  DODGE_THRESHOLD: 0.8,
-  DODGE_SPEED: 0.25,
-  DODGE_WAIT: 0.6,
-  DODGE_RETURN: 0.4,
+// Pose spots configuration
+export const POSE_SPOTS = {
   YES_COUNT: 3,
-  NO_COUNT: 4,
+  NO_COUNT: 5,
+  POSE_DURATION: 2.0,
+  PROXIMITY: 1.5,
+  DODGE_THRESHOLD: 2.5,
+  DODGE_SPEED: 0.3,
+  DODGE_WAIT: 0.5,
+  DODGE_RETURN: 0.4,
+};
+
+// Messages
+export const MESSAGES = {
+  CELEBRATION: "OMG you said YES!! Spotted: Cutakshita has a very special plan coming her way from Prateek ;)",
+  GG_NARRATION: "Spotted on the Upper East Side: Akshita Sharma saying YES to being Prateek's Valentine. Looks like this season's hottest couple just got official. You know you love me. XOXO, Gossip Girl.",
+  DODGE_MESSAGES: [
+    'Not this spot, darling!', 'A queen knows where to pose~',
+    'Try the gold ones, gorgeous!', 'That spot is SO last season.',
+    'Nuh uh, Cutakshita!', 'Even Blair would say no to that spot.',
+    'Keep walking, supermodel!', 'Wrong spotlight, babe!',
+    'The paparazzi want you elsewhere~', 'Fashion faux pas! Try again.',
+    'Strike a pose... just not here!', 'Move along, beautiful!',
+    'This spot is reserved for nobodies.', 'You deserve a better spot!',
+    'XOXO, try again~', 'Gossip Girl says: wrong spot!',
+    'The gold spots are calling you!', 'Channel your inner Blair!',
+  ],
+  FLIRTY_TEXTS: [
+    'Serving LOOKS!', 'The camera loves you!',
+    'Vogue-worthy, Cutakshita!', 'Blair who?? This is YOUR runway.',
+    'Absolutely iconic.', 'The Upper East Side is shaking!',
+    'Fashion week has a new star!', 'Work it, gorgeous!',
+    'Prateek is one lucky guy ;)', 'Spotted: perfection.',
+  ],
 };
 
 // Telegram notification
-export const TELEGRAM_BOT_TOKEN = '8576846851:AAEC66VGXS3vm7L7PWjAVpdJIII4zh4I2NU'; // Fill with your bot token from @BotFather
-export const TELEGRAM_CHAT_ID = '2009978277';   // Prateek's chat ID
-
-// Celebration message
-export const CELEBRATION_MESSAGE = "Wow you hit Yes!! That means you've got a good plan coming your way from Prateek ;)";
+export const TELEGRAM_BOT_TOKEN = '8576846851:AAEC66VGXS3vm7L7PWjAVpdJIII4zh4I2NU';
+export const TELEGRAM_CHAT_ID = '2009978277';
