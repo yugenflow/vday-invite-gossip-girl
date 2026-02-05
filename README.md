@@ -95,10 +95,10 @@ Everything personal to the two people is configured via environment variables an
 
 | Variable | What it controls | Example |
 |---|---|---|
-| `VITE_SENDER_NAME` | Your name -- celebration text, flirty texts, GG narration, Telegram alerts | `Prateek` |
-| `VITE_RECIPIENT_NAME` | Their first name -- Telegram notifications | `Akshita` |
-| `VITE_RECIPIENT_PETNAME` | Their nickname -- dodge messages, flirty texts, celebration text, Gossip Girl blast | `Cutakshita` |
-| `VITE_RECIPIENT_FULL_NAME` | Their full name -- GG narration, auto-generates the name puzzle hint in the guidelines | `Akshita Sharma` |
+| `VITE_SENDER_NAME` | Your name -- celebration text, flirty texts, GG narration, Telegram alerts | `John` |
+| `VITE_RECIPIENT_NAME` | Their first name -- Telegram notifications | `Blair` |
+| `VITE_RECIPIENT_PETNAME` | Their nickname -- dodge messages, flirty texts, celebration text, Gossip Girl blast | `Blairy` |
+| `VITE_RECIPIENT_FULL_NAME` | Their full name -- GG narration, auto-generates the name puzzle hint in the guidelines | `Blair Waldorf` |
 
 **Where each name shows up:**
 
@@ -107,7 +107,7 @@ Everything personal to the two people is configured via environment variables an
 - **Dodge messages**: "Nuh uh, `PETNAME`!"
 - **Flirty texts**: "Vogue-worthy, `PETNAME`!" / "`SENDER` is one lucky guy"
 - **Gossip Girl blast** (runway guidelines): "A certain `PETNAME` entering a private fashion studio..."
-- **Name puzzle**: Auto-generated from `FULL_NAME` (e.g. "Akshita Sharma" becomes `A _ _ _ _ _ _ S _ _ _ _ A`)
+- **Name puzzle**: Auto-generated from `FULL_NAME` (e.g. "Blair Waldorf" becomes `B _ _ _ _ R W _ _ _ _ _ F`)
 - **Telegram notifications**: "`PETNAME` has entered her room" / "`RECIPIENT` struck all 3 poses!"
 
 ### Secret Passphrase
