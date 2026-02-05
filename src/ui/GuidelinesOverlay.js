@@ -1,4 +1,5 @@
 import guidelinesText from '../../gossipgirlblast.txt?raw';
+import { NAMES, generateNameHint } from '../config.js';
 
 export class GuidelinesOverlay {
   constructor() {
@@ -7,7 +8,10 @@ export class GuidelinesOverlay {
     this.closeBtn = document.getElementById('guidelines-close');
     this.onClose = null;
 
-    this.textEl.innerHTML = this.formatGuidelines(guidelinesText);
+    const personalizedText = guidelinesText
+      .replace(/\{\{PETNAME\}\}/g, NAMES.petname)
+      .replace(/\{\{NAME_HINT\}\}/g, generateNameHint(NAMES.recipientFull));
+    this.textEl.innerHTML = this.formatGuidelines(personalizedText);
 
     this.closeBtn.addEventListener('click', () => {
       this.hide();

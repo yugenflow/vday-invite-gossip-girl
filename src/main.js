@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CAMERA, PLAYER, APARTMENT, RUNWAY, DOOR, POSE_SPOTS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from './constants.js';
+import { NAMES, SECRET_KEY } from './config.js';
 import { GameStateMachine, STATES } from './state/GameStateMachine.js';
 import { gameState } from './state/GameState.js';
 import { createApartmentScene, decorateRoomForSurprise, animateFloatingHearts } from './scenes/ApartmentScene.js';
@@ -302,7 +303,7 @@ fsm.on(STATES.APARTMENT, () => {
   // First time entering apartment - send Telegram and show first task
   if (apartmentFirstEntry) {
     apartmentFirstEntry = false;
-    sendTelegram("👗 [UES] Cutakshita has entered her room");
+    sendTelegram(`👗 [UES] ${NAMES.petname} has entered her room`);
     hud.showTask("Check your work laptop for new mail");
   }
 
@@ -559,7 +560,7 @@ fsm.on(STATES.RETURNING_APARTMENT, async () => {
   thirdPerson.azimuth = 0;
   character.rotation.y = 0;
 
-  // Decorate room with Prateek if game is complete and surprise not yet shown
+  // Decorate room with surprise character if game is complete and surprise not yet shown
   if (gameState.gameComplete && !gameState.surpriseShown) {
     decorateRoomForSurprise(apartmentScene);
     gameState.surpriseShown = true;
@@ -586,7 +587,7 @@ function onPoseStruck() {
 
   if (poseCount >= POSES_REQUIRED) {
     // Final pose - send special telegram
-    sendTelegram("🎉 [UES] 3/3 YES! Valentine invite accepted! ❤️");
+    sendTelegram(`🎉 [UES] 3/3 YES! ${NAMES.recipient}'s Valentine invite accepted! ❤️`);
     hud.hideTask();
     // Auto-release pose after a brief moment then celebrate
     setTimeout(() => {
@@ -625,7 +626,7 @@ fsm.on(STATES.CELEBRATION, async () => {
 
   celebrationOverlay.show();
 
-  sendTelegram("\uD83D\uDCF8 Akshita struck all 3 poses! Valentine invite accepted! \u2764\uFE0F\uD83D\uDC83");
+  sendTelegram(`\uD83D\uDCF8 ${NAMES.recipient} struck all 3 poses! Valentine invite accepted! \u2764\uFE0F\uD83D\uDC83`);
 });
 
 celebrationOverlay.onContinue = () => {
@@ -674,7 +675,7 @@ const keyInput = document.getElementById('key-input');
 const keyError = document.getElementById('key-error');
 const keySubmit = document.getElementById('key-submit');
 
-const SECRET_KEY = 'ComeToDaddy';
+// SECRET_KEY imported from config.js
 
 setTimeout(() => {
   loadingScreen.classList.add('hidden');

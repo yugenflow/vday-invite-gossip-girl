@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { makeBox, makeCylinder, makeTextCanvas } from '../utils/LowPolyHelpers.js';
 import { COLORS, RUNWAY } from '../constants.js';
+import { BANNER_TEXT } from '../config.js';
 
 export function createRunwayPlatform() {
   const group = new THREE.Group();
@@ -180,7 +181,7 @@ export function createBackdrop() {
 
   // Banner text — large and prominent so it's visible from the entrance
   const bannerCanvas = makeTextCanvas(
-    'Will you be my Valentine?',
+    BANNER_TEXT,
     1536, 384, 'italic bold 84px Georgia', '#FFD700', 'transparent'
   );
   const tex = new THREE.CanvasTexture(bannerCanvas);

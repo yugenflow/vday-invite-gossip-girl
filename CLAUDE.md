@@ -1,108 +1,125 @@
-# VDay-Invite
+# VDay in NYC
 
 ## Project Overview
-A personalized Valentine's Day invite disguised as a browser-based 3D mini-game. The recipient (a rifle shooter by hobby and profession) navigates through a cozy bedroom into a shooting range, picks up a rifle, and shoots targets labeled "Yes" / "No" to answer "Will you be my Valentine?" - with a twist: the "No" targets are unhittable.
+A personalized Valentine's Day invite disguised as a browser-based 3D mini-game. The recipient explores a Gossip Girl-inspired Upper East Side luxury apartment, walks through a wardrobe door onto a fashion runway, and strikes a pose on spotlight spots labeled "Yes" / "No" to answer "Will you be my Valentine?" -- with a twist: the "No" spots dodge away and are impossible to pose on.
 
 ## Game Flow (Storyboard)
 
-### Scene 1 - The Bedroom (Third Person)
-- Player spawns in a cozy, detailed low-poly bedroom
-- Props: bed, desk, posters, warm lighting, shooting trophies/medals as Easter eggs
-- A door leads to the shooting range
-- Player moves character using WASD/arrow keys, camera follows
+### Scene 1 - The Apartment (Third Person)
+- Player spawns in a luxury Blair Waldorf-style Upper East Side apartment
+- Props: bed with blush bedding, vanity mirror with bulbs, designer bags (Hermes-style), headbands, art deco paintings, macarons, soft toys, a ginger cat, book rack, guitar, laptop, plants, fairy lights, wardrobe
+- A wardrobe door leads to the runway
+- Player moves character using WASD/arrow keys, camera follows in third person
 
-### Scene 2 - Entering the Range
-- Player walks through the door into the shooting range
-- Pop-up appears: "Before you start shooting, please read the range guidelines."
-- A guidelines booklet/clipboard is visible - player interacts with it
+### Scene 2 - The Wardrobe Transition
+- Player walks through the wardrobe door
+- Character outfit changes from blush pink pajamas to a runway outfit (LBD, lace bralette detail, heels with red soles, gold clutch)
+- Scene transitions to the fashion runway
 
-### Scene 3 - The Guidelines (First Person / Document View)
-- Switches to a first-person document view
-- Displays the custom guidelines text (content in `guidelines.txt`)
-- Player closes the document when done reading
+### Scene 3 - The Runway
+- Player enters a dark, dramatic fashion show venue
+- VOGUE banners line the walls, spotlights illuminate the runway
+- Paparazzi cameras on tripods, an audience section
+- Gold "YES" pose spots and red "NO" pose spots are placed along the runway
 
-### Scene 4 - The Rifle (Transition to FPS)
-- Player can now pick up the rifle on a table/rack
-- View switches to first-person shooter mode
-- A banner is visible in the range: "Will you be my Valentine?"
-- Multiple targets downrange labeled "Yes" and "No"
+### Scene 4 - Striking a Pose
+- Player walks onto pose spots
+- "No" spots: dodge / slide away when the player gets close (unhittable)
+- Flirty dodge messages appear ("Not this spot, darling!", "That spot is SO last season.")
+- "Yes" spot: when player steps on it, character strikes a pose and celebration triggers
 
-### Scene 5 - Shooting
-- Player aims and shoots at targets
-- "No" targets: dodge / disappear / move away right before the bullet hits (unhittable)
-- "Yes" target: when hit, triggers celebration
+### Scene 5 - Celebration
+- Confetti, hearts, particle effects
+- Gossip Girl blast narration appears on screen
+- Personal message displayed
+- Prateek character appears on the runway for a surprise scene
 
-### Scene 6 - Celebration
-- Confetti, particle effects, screen flash
-- A personal message appears on screen (from the sender)
-- When exiting back to third person, the range is transformed: hearts, fairy lights, decorations replace the targets
-- Player can walk around the decorated range
-
-### Scene 7 - Share
-- A "Share your result" button appears
-- Generates a copyable link / pre-filled message she can send
+### Scene 6 - Share
+- Email invite overlay with personalized message
+- Shareable link (copy to clipboard)
+- Telegram notification sent to Prateek when "Yes" is hit
 
 ## Design / Aesthetic
-- **Style**: Low-poly / voxel inspired (Roblox/Minecraft feel) but with good detailing and warm aesthetics
-- **Palette**: Warm, cozy tones for bedroom; cooler/industrial for the range; pinks/reds/golds for celebration
-- **Lighting**: Soft ambient in bedroom, bright fluorescent in range, warm fairy-light glow post-celebration
+- **Style**: Low-poly procedural geometry (all built with Three.js primitives, no external models)
+- **Palette**: Warm blush/gold/cream for apartment; dark dramatic blacks/golds for runway; pinks/reds/golds for celebration
+- **Lighting**: Soft ambient + fairy lights in apartment; dramatic spotlights on runway; warm glow post-celebration
+- **Theme**: Gossip Girl / Upper East Side luxury fashion
 
 ### Character Design
-- **Hair**: Black, tied in a ponytail with a half-cap (shooter-style visor cap)
+- **Hair**: Black, tied in a ponytail
 - **Skin tone**: Fair/wheatish
-- **Shooting jacket (back)**: White base with red/black color blocking on the lats
-- **Shooting jacket (front)**: Mostly black/red/dark gray color blocking
-- **Sleeves**: Red with black blocking around shoulder/upper arm area
-- **Pants**: Red and white color blocking
-- **Rifle**: Long-range 50m competition rifle, silver colored
+- **Apartment outfit**: Blush pink pajamas with fuzzy slippers
+- **Runway outfit**: Black LBD with lace bralette detail, black heels with red soles (Louboutin-style), gold clutch, black-frame glasses
+- **Prateek (surprise scene)**: Separate character model that appears post-celebration
 
-### Bedroom Props (Personalized)
-- Bed with cozy bedding
-- Desk with items on it
-- Book rack mounted on wall above the desk
-- Mirror on the wall
-- Keyboard on a stand (musical keyboard)
-- Paintings on walls
-- A Labrador dog (can be lying on bed or near the desk, maybe wags tail)
-- Shooting trophies/medals as Easter eggs
-- Warm ambient lighting (lamp on desk, fairy lights, etc.)
+### Apartment Props (Personalized)
+- Bed with blush/pink cozy bedding and pillows
+- Hollywood-style vanity mirror with light bulbs
+- Designer bags (orange, black, cream -- Hermes-inspired)
+- Satin/velvet/pearl headbands on display
+- Art deco paintings in gold frames
+- Macarons in pastel colors on a plate
+- Soft toys on the bed
+- Ginger cat (animated, idle movement)
+- Book rack mounted on wall
+- Guitar on a stand
+- Laptop on desk
+- Plants in pots
+- Fairy lights along walls
+- Full-length mirror
+- Wardrobe with gold accents (serves as door to runway)
+- Warm ambient lighting (lamp, fairy lights)
 
 ## Features
 - Third-person character controller (WASD + mouse)
-- Scene transitions (bedroom -> range)
-- Document/UI overlay for guidelines
-- First-person shooter mechanics (aim + shoot)
-- Target hit detection with "No" dodge logic
-- Celebration sequence (confetti, message, environment transformation)
-- Shareable result link (no backend needed)
+- Scene transitions (apartment -> runway) with outfit change
+- Pose spot mechanics with "No" dodge logic
+- Gossip Girl-themed narration and UI text
+- Celebration sequence (confetti, hearts, message, Prateek surprise)
+- Email invite overlay system
+- Telegram Bot notification on "Yes"
+- Mobile touch controls with virtual joystick
+- Shareable result link
 
 ## Tech Stack
-- **Engine**: Three.js (browser-based 3D, no install needed)
-- **Language**: JavaScript/TypeScript
-- **Hosting**: Netlify / GitHub Pages / Vercel (static, free)
-- **Notification**: Shareable link (copy to clipboard)
-- **No backend required** - fully client-side
+- **Engine**: Three.js (browser-based 3D, all procedural geometry)
+- **Build Tool**: Vite
+- **Language**: JavaScript (ES modules)
+- **Hosting**: Vercel (auto-deploy from master)
+- **Notifications**: Telegram Bot API via environment variables
+- **No backend required** -- fully client-side
 
 ## Architecture Notes
-- Single-page app, all assets bundled
-- Scene management: state machine (bedroom -> range -> fps -> celebration)
-- Assets: low-poly 3D models (procedurally generated or minimal glTF)
-- Physics: simple raycasting for shooting, no heavy physics engine needed
-- Mobile support: TBD (nice to have, but primary target is desktop)
+- Single-page app, all assets bundled by Vite
+- Scene management: state machine (apartment -> runway -> posing -> celebration)
+- All 3D geometry procedurally generated with Three.js primitives (BoxGeometry, SphereGeometry, CylinderGeometry, etc.)
+- No external 3D model files -- everything is code-generated
+- Mobile support with virtual joystick and touch controls
+- Environment variables for sensitive credentials (Telegram tokens)
+- All personalized names configured via env vars in `src/config.js` (VITE_SENDER_NAME, VITE_RECIPIENT_NAME, VITE_RECIPIENT_PETNAME, VITE_RECIPIENT_FULL_NAME)
+- `gossipgirlblast.txt` uses `{{PETNAME}}` and `{{NAME_HINT}}` placeholders, replaced at runtime by `GuidelinesOverlay.js`
 
-## Celebration Message
-"Wow you hit Yes!! That means you've got a good plan coming your way from Prateek ;)"
+## Project Structure
+```
+src/
+├── main.js              # Entry point, game loop
+├── config.js            # Name personalization (env vars)
+├── constants.js         # Colors, dimensions, messages, config
+├── character/           # CharacterModel.js, PrateekModel.js
+├── controls/            # ThirdPersonController.js, MobileControls.js
+├── scenes/              # ApartmentScene.js, RunwayScene.js
+├── props/               # All 3D props (20+ files)
+├── state/               # GameState.js, GameStateMachine.js
+├── systems/             # Celebration, Interaction, Transition, Pose, SpotDodge
+└── ui/                  # GuidelinesOverlay, CelebrationOverlay, EmailOverlay, HUD
+```
 
-## Open Items
-- [x] Character appearance details (hair, outfit, etc.)
-- [x] Guidelines document content (`guidelines.txt`)
-- [x] Personal message for celebration screen
-- [x] Bedroom decoration details
-- [x] Notification approach: share result link first, Telegram integration later (Phase 2)
-- [x] Fix minor typos in guidelines.txt
+## Key Messages
+- **Celebration**: "OMG you said YES!! Spotted: Cutakshita has a very special plan coming her way from Prateek ;)"
+- **GG Narration**: "Spotted on the Upper East Side: Akshita Sharma saying YES to being Prateek's Valentine. Looks like this season's hottest couple just got official. You know you love me. XOXO, Gossip Girl."
 
 ## Status
 - [x] Brainstorming
-- [ ] Design finalized
-- [ ] Implementation
+- [x] Design finalized
+- [x] Implementation
 - [ ] Polish & deploy

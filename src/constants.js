@@ -1,3 +1,5 @@
+import { NAMES } from './config.js';
+
 // Colors — Upper East Side / Gossip Girl palette
 export const COLORS = {
   // Apartment (Blair Waldorf luxury)
@@ -137,12 +139,12 @@ export const POSE_SPOTS = {
 
 // Messages
 export const MESSAGES = {
-  CELEBRATION: "OMG you said YES!! Spotted: Cutakshita has a very special plan coming her way from Prateek ;)",
-  GG_NARRATION: "Spotted on the Upper East Side: Akshita Sharma saying YES to being Prateek's Valentine. Looks like this season's hottest couple just got official. You know you love me. XOXO, Gossip Girl.",
+  CELEBRATION: `OMG you said YES!! Spotted: ${NAMES.petname} has a very special plan coming her way from ${NAMES.sender} ;)`,
+  GG_NARRATION: `Spotted on the Upper East Side: ${NAMES.recipientFull} saying YES to being ${NAMES.sender}'s Valentine. Looks like this season's hottest couple just got official. You know you love me. XOXO, Gossip Girl.`,
   DODGE_MESSAGES: [
     'Not this spot, darling!', 'A queen knows where to pose~',
     'Try the gold ones, gorgeous!', 'That spot is SO last season.',
-    'Nuh uh, Cutakshita!', 'Even Blair would say no to that spot.',
+    `Nuh uh, ${NAMES.petname}!`, 'Even Blair would say no to that spot.',
     'Keep walking, supermodel!', 'Wrong spotlight, babe!',
     'The paparazzi want you elsewhere~', 'Fashion faux pas! Try again.',
     'Strike a pose... just not here!', 'Move along, beautiful!',
@@ -152,13 +154,13 @@ export const MESSAGES = {
   ],
   FLIRTY_TEXTS: [
     'Serving LOOKS!', 'The camera loves you!',
-    'Vogue-worthy, Cutakshita!', 'Blair who?? This is YOUR runway.',
+    `Vogue-worthy, ${NAMES.petname}!`, 'Blair who?? This is YOUR runway.',
     'Absolutely iconic.', 'The Upper East Side is shaking!',
     'Fashion week has a new star!', 'Work it, gorgeous!',
-    'Prateek is one lucky guy ;)', 'Spotted: perfection.',
+    `${NAMES.sender} is one lucky guy ;)`, 'Spotted: perfection.',
   ],
 };
 
 // Telegram notification
-export const TELEGRAM_BOT_TOKEN = '8576846851:AAEC66VGXS3vm7L7PWjAVpdJIII4zh4I2NU';
-export const TELEGRAM_CHAT_ID = '2009978277';
+export const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '';
+export const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID || '';
