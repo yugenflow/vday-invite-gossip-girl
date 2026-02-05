@@ -1,17 +1,17 @@
 // Personalize these via environment variables.
 // Set them in .env.local for local dev, or in your hosting dashboard for production.
 export const NAMES = {
-  sender: import.meta.env.VITE_SENDER_NAME || 'Prateek',
-  recipient: import.meta.env.VITE_RECIPIENT_NAME || 'Akshita',
-  petname: import.meta.env.VITE_RECIPIENT_PETNAME || 'Cutakshita',
-  recipientFull: import.meta.env.VITE_RECIPIENT_FULL_NAME || 'Akshita Sharma',
+  sender: (import.meta.env.VITE_SENDER_NAME || 'Prateek').trim(),
+  recipient: (import.meta.env.VITE_RECIPIENT_NAME || 'Akshita').trim(),
+  petname: (import.meta.env.VITE_RECIPIENT_PETNAME || 'Cutakshita').trim(),
+  recipientFull: (import.meta.env.VITE_RECIPIENT_FULL_NAME || 'Akshita Sharma').trim(),
 };
 
 // Secret passphrase the recipient must enter to start the game.
-export const SECRET_KEY = import.meta.env.VITE_SECRET_KEY || 'ComeToDaddy';
+export const SECRET_KEY = (import.meta.env.VITE_SECRET_KEY || 'ComeToDaddy').trim();
 
 // The banner question displayed on the runway backdrop.
-export const BANNER_TEXT = import.meta.env.VITE_BANNER_TEXT || 'Will you be my Valentine?';
+export const BANNER_TEXT = (import.meta.env.VITE_BANNER_TEXT || 'Will you be my Valentine?').trim();
 
 // Generate a name-hint puzzle like "A _ _ _ _ _ _ S _ _ _ _ A" from a full name.
 // Shows the first letter, last letter, and the first letter of each word.
