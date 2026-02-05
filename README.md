@@ -114,7 +114,7 @@ Everything personal to the two people is configured via environment variables an
 
 | Variable | What it controls | Example |
 |---|---|---|
-| `VITE_SECRET_KEY` | The passphrase the recipient must type on the start screen to enter the game | `ComeToDaddy` |
+| `VITE_SECRET_KEY` | The passphrase the recipient must type on the start screen to enter the game | `ThisIsTheSecret` |
 
 ### Runway Banner
 
