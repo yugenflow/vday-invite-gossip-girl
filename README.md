@@ -6,10 +6,15 @@ A personalized Valentine's Day experience disguised as a browser-based 3D mini-g
 
 ## Screenshots
 
-<!-- Add screenshots here -->
-![Apartment Scene](screenshots/apartment.png)
-![Runway Scene](screenshots/runway.png)
-![Celebration](screenshots/celebration.png)
+![1 - Home screen](screenshots/01-home-screen.png)
+![2 - Secret passphrase gate](screenshots/02-secret-phrase.png)
+![3 - Explore the Upper East Side apartment](screenshots/03-apartment.png)
+![4 - Check your work email -- VOGUE invite awaits](screenshots/04-check-mail.png)
+![5 - Runway outfit & wardrobe change](screenshots/05-runway-outfit.png)
+![6 - The runway -- YES and NO pose spots](screenshots/06-runway.png)
+![7 - Strike a pose on the gold spots](screenshots/07-runway-posing.png)
+![8 - Post-acceptance -- VOGUE banners & share your result](screenshots/08-post-acceptance.png)
+![9 - Back to the room -- surprise ending](screenshots/09-back-to-room.png)
 
 ## Game Flow
 
